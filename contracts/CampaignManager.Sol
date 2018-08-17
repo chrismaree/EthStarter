@@ -36,11 +36,21 @@ contract CampaignManager is Ownable{
         string ipfsHash;
     }
     
-    /** @dev store all campaigns as a mapping to their unique ID **/
-    mapping(uint=>Campaign) public campaigns;
-    
     /** @dev store the total number of campaigns. Useful for retreving all of them **/
     uint campaignCount;
+    
+    /**
+    * @dev Stop the creation of new campagins
+    */
+    bool emergencyStop_stopCreation = false;
+    
+    /**
+    * @dev stops the fundion of existing campagins
+    */
+    bool emergencyStop_stopFunding = false;
+    
+    /** @dev store all campaigns as a mapping to their unique ID **/
+    mapping(uint=>Campaign) public campaigns;
     
     /**
     * @dev Verify the times spesified for the campaign are valid
@@ -150,12 +160,17 @@ contract CampaignManager is Ownable{
     
     /**
      * @dev checks if a campain has been funded, and therefore paid out. 
-     * @notice This assertion prevents someone from withdrawing twice from the fund.
+     * @notice This assertion prevents manager's from withdrawing twice from a fund.
      * @param _campaignID unique identifer of the campaign
      */
     modifier campaignNotFunded(uint _campaignID){
         require(campaigns[_campaignID].state != State.Funded);
         _;
+    }
+    
+    campaignUnsuccessful(uint _campaignID) {
+        require(now > campaigns[_campaignID].endingTime);
+        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal);
     }
     
     /**
@@ -178,8 +193,13 @@ contract CampaignManager is Ownable{
         _;
     }
     
-    modifier campaignUnsuccessful(uint _campaignID){
-        
+    modifier emergencyStop_stopCreation(){
+        assert(!emergencyStop_stopCreation);
+        _;
+    }
+    
+    modifier emergencyStop_stopFunding(){
+        assert(!emergencyStop_stopFunding);
         _;
     }
     
@@ -209,6 +229,7 @@ contract CampaignManager is Ownable{
         public
         validNewCampaignTime(_startingTime,_endingTime)
         validNewCampaignFunding(_goal,_cap)
+        emergencyStop_stopCreation
     {
         address[] memory emptydonersAddresses;
         campaigns[campaignCount] = Campaign({
@@ -237,6 +258,7 @@ contract CampaignManager is Ownable{
         campaignHasStarted(_campaignID)
         campaignHasNotEnded(_campaignID)
         campaignWillNotExceedCap(_campaignID)
+        emergencyStop_stopFunding
     {
         campaigns[_campaignID].balance += msg.value;
         // Need to implicity typecast the msg.value for as donars can be
