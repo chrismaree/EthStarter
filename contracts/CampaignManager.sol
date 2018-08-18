@@ -3,10 +3,10 @@ pragma solidity ^0.4.24;
 import "./Ownable.sol";
 
 /** @title A managment contract to store and manage all Campains for the platform.
- * This enables users to create new campagins and then other users can fund them.
- * Users can only fund campains that are currently running(have started and not
- * finished). If a user withdraws from a campaign, they can only do so if it does
- * not result in the campaign no longer getting funded.
+* This enables users to create new campagins and then other users can fund them.
+* Users can only fund campains that are currently running(have started and not
+* finished). If a user withdraws from a campaign, they can only do so if it does
+* not result in the campaign no longer getting funded.
 * @author Chris Maree - SoIdarity 
 */
 contract CampaignManager is Ownable{
@@ -86,11 +86,62 @@ contract CampaignManager is Ownable{
     }
     
     /**
+    * @dev checks if the campaign is yet to start
+    * @param _campaignID unique identifer of the campaign
+    */
+    modifier campaignNotStarted(uint _campaignID){
+        require(now < campaigns[_campaignID].startingTime);
+        _;
+    }
+
+    /**
+    * @dev checks if the campain has ended (current time more than end time)
+    * @param _campaignID unique identifer of the campaign
+    */
+    modifier campaignEnded(uint _campaignID){
+        require(now>campaigns[_campaignID].endingTime);
+        _;
+    }
+
+    /**
     * @dev Verify the current time is not past the end time of the camaign
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignHasNotEnded(uint _campaignID) {
         require(now<campaigns[_campaignID].endingTime);
+        _;
+    }
+    
+
+    
+
+    
+    /**
+    * @dev checks if the campain has Succeeded (donation > than goal)
+    * @param _campaignID unique identifer of the campaign
+    */
+    modifier campaignSucceeded(uint _campaignID){
+        require(campaigns[_campaignID].balance>campaigns[_campaignID].goal);
+        _;
+    }
+
+    /**
+    * @dev checks if the campain has failed (donation < than goal)
+    * @param _campaignID unique identifer of the campaign
+    */
+    modifier campaignUnsuccessful(uint _campaignID) {
+        require(now > campaigns[_campaignID].endingTime);
+        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal);
+        _;
+    }
+
+    /**
+    * @dev checks if a campain has been funded, and therefore paid out. 
+    * @notice This assertion prevents manager's from withdrawing twice from a fund.
+    * @param _campaignID unique identifer of the campaign
+    */
+    modifier campaignNotFunded(uint _campaignID){
+        require(campaigns[_campaignID].state != State.Funded);
         _;
     }
     
@@ -141,64 +192,37 @@ contract CampaignManager is Ownable{
     }
     
     /**
-    * @dev checks if the campain has ended (current time more than end time)
+    * @dev checks that the caller of the function is the campaign's manager;
+    * This is the person that create the campaign.
     * @param _campaignID unique identifer of the campaign
     */
-    modifier campaignEnded(uint _campaignID){
-        require(now>campaigns[_campaignID].endingTime);
-        _;
-    }
-    
-    /**
-    * @dev checks if the campain has Succeeded (donation more than goal)
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignSucceeded(uint _campaignID){
-        require(campaigns[_campaignID].balance>campaigns[_campaignID].goal);
-        _;
-    }
-    
-    /**
-     * @dev checks if a campain has been funded, and therefore paid out. 
-     * @notice This assertion prevents manager's from withdrawing twice from a fund.
-     * @param _campaignID unique identifer of the campaign
-     */
-    modifier campaignNotFunded(uint _campaignID){
-        require(campaigns[_campaignID].state != State.Funded);
-        _;
-    }
-    
-    campaignUnsuccessful(uint _campaignID) {
-        require(now > campaigns[_campaignID].endingTime);
-        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal);
-    }
-    
-    /**
-     * @dev checks that the caller of the function is the campaign's manager;
-     * This is the person that create the campaign.
-     * @param _campaignID unique identifer of the campaign
-     */
     modifier onlyManager(uint _campaignID){
         require(msg.sender == campaigns[_campaignID].manager);
         _;
     }
     /**
-     * @dev checks if a caller of the function is a Contributer to the campaign
-     * @notice If they have contributed, there will be some items within the 
-     * doners array representing donations.
-     * @param _campaignID unique identifer of the campaign
-     */
+    * @dev checks if a caller of the function is a Contributer to the campaign
+    * @notice If they have contributed, there will be some items within the 
+    * doners array representing donations.
+    * @param _campaignID unique identifer of the campaign
+    */
     modifier onlyContributer(uint _campaignID){
         require(campaigns[_campaignID].doners[msg.sender].length > 0);
         _;
     }
     
-    modifier emergencyStop_stopCreation(){
+    /**
+    * @dev Prevents the creation of new campaigns
+    */
+    modifier emergencyStop_Creation(){
         assert(!emergencyStop_stopCreation);
         _;
     }
     
-    modifier emergencyStop_stopFunding(){
+    /**
+    * @dev Prevents the funding of new campaigns
+    */
+    modifier emergencyStop_Funding(){
         assert(!emergencyStop_stopFunding);
         _;
     }
@@ -208,6 +232,20 @@ contract CampaignManager is Ownable{
         public {
         owner = msg.sender;
         campaignCount = 0;
+    }
+    
+    function enableEmergencyStop_Creation()
+        public
+        onlyOwner
+    {
+        emergencyStop_stopCreation = true;
+    }
+    
+    function enableEmergencyStop_Funding()
+        public
+        onlyOwner
+    {
+        emergencyStop_stopFunding = true;
     }
     
     /**
@@ -229,7 +267,7 @@ contract CampaignManager is Ownable{
         public
         validNewCampaignTime(_startingTime,_endingTime)
         validNewCampaignFunding(_goal,_cap)
-        emergencyStop_stopCreation
+        emergencyStop_Creation
     {
         address[] memory emptydonersAddresses;
         campaigns[campaignCount] = Campaign({
@@ -258,7 +296,7 @@ contract CampaignManager is Ownable{
         campaignHasStarted(_campaignID)
         campaignHasNotEnded(_campaignID)
         campaignWillNotExceedCap(_campaignID)
-        emergencyStop_stopFunding
+        emergencyStop_Funding
     {
         campaigns[_campaignID].balance += msg.value;
         // Need to implicity typecast the msg.value for as donars can be
@@ -337,5 +375,20 @@ contract CampaignManager is Ownable{
         // that if they try redraw again the sum total == 0
         campaigns[_campaignID].doners[msg.sender].push(-int(totalContributed));
         msg.sender.transfer(totalContributed);
+    }
+
+    /**
+    * @dev Enables a fund manager to update the ipfs hash on an entry in the 
+    * case they change it. 
+    * @notice They can ONLY do this before a fund is sstarted.
+    * @param _campaignID unique identifer of the campaign
+    * @param _newHash defines the new IPFS hash for the campaign
+    */
+    function updateIpfsHash(uint _campaignID, string _newHash)
+    public
+    onlyManager(_campaignID)
+    campaignNotStarted(_campaignID)
+    {
+        campaigns[_campaignID].ipfsHash = _newHash;
     }
 }

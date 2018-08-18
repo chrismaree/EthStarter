@@ -1,5 +1,5 @@
-var SimpleStorage = artifacts.require("SimpleStorage");
+var CampaignManager = artifacts.require("CampaignManager");
 
 module.exports = function (deployer) {
-    deployer.deploy(SimpleStorage,0); //spesify the constructor as 0
+    deployer.deploy(CampaignManager);
 };
