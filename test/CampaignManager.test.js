@@ -172,7 +172,7 @@ contract('CampaignManager', function (accounts) {
 
         //Next, we want to reduce our donation by a set amount and check we get the ether back correctly and that the fund is reduced
 
-        let responce = await campaignManager.reduceDontation(campaignID, (validDonation/2), {
+        let responce = await campaignManager.reduceDontation(campaignID, (validDonation / 2), {
             from: funder1
         })
 
@@ -190,7 +190,7 @@ contract('CampaignManager', function (accounts) {
         // campaign fail. After this funding, the fund should have a value of 12.5 eth. This is more than the goal but less than the cap
         await campaignManager.fundCampaign(campaignID, {
             from: funder2,
-            value: validDonation*2
+            value: validDonation * 2
         })
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
@@ -204,13 +204,13 @@ contract('CampaignManager', function (accounts) {
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
-        
+
         // Last thing to check is that a doner cant withdraw after the campaign has finished
         await increaseTimeTo(afterEndingTime);
         await expectThrow(campaignManager.reduceDontation(campaignID, ether(3), {
             from: funder2
         }), EVMRevert);
-    
+
     })
 
     it('Withdraw Campaign Funds should only alow valid inputs', async () => {
@@ -225,28 +225,30 @@ contract('CampaignManager', function (accounts) {
         await increaseTimeTo(duringCampaignTime);
         await campaignManager.fundCampaign(campaignID, {
             from: funder1,
-            value: validDonation*2.5 //we want to fund the campaign such that it is above the goal but less than the cap. this = 12.5 ether
+            value: validDonation * 2.5 //we want to fund the campaign such that it is above the goal but less than the cap. this = 12.5 ether
         })
 
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0]*2.5, "Balance should be equal to the donation amount")
+        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0] * 2.5, "Balance should be equal to the donation amount")
 
-        
+
         // Ensure that the manager can withdraw before the campaign has ended
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
             from: manager
         }), EVMRevert);
 
-        // Ensure that non-managers can't withdraw campaign
+        // Ensure that non-managers can't withdraw campaign funds
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
             from: funder1
         }), EVMRevert);
-        
-        
+
+
         // Next, we set the time to be after the end of the campaign so the manager can try withdraw the funds
         await increaseTimeTo(afterEndingTime);
-        
-        await campaignManager.withdrawCampaignFunds(campaignID, {from: manager});
+
+        await campaignManager.withdrawCampaignFunds(campaignID, {
+            from: manager
+        });
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[6]['c'][0], 2, "State should be set to Funded(2)")
@@ -255,7 +257,73 @@ contract('CampaignManager', function (accounts) {
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
             from: manager
         }), EVMRevert);
-
     })
-    
+
+    it('Refund Failed Campaign should only alow valid inputs', async () => {
+        // First, we need a campaign to test against
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
+        //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
+        let campaignID = await campaignManager.campaignCount() - 1
+
+        // Set time to during the campaign and then try fund it.
+        await increaseTimeTo(duringCampaignTime);
+        await campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation * 1.5 //we want to fund the campaign such that it is below the goal. 1.5* validDonation = 7.5eth
+        })
+
+        let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0] * 1.5, "Balance should be equal to the donation amount")
+
+        
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+
+        //Should not be able to call this until the campaign has ended so check that it reverts
+        await expectThrow(campaignManager.refundFailedCampaign(campaignID, {
+            from: funder1
+        }), EVMRevert);
+
+        await increaseTimeTo(afterEndingTime);
+
+        await campaignManager.refundFailedCampaign(campaignID, {
+            from: funder1
+        })
+
+        // Lastly, check that the user cant withdraw failed funds for a second time
+        await expectThrow(campaignManager.refundFailedCampaign(campaignID, {
+            from: funder1
+        }), EVMRevert);
+    })
+
+    it('Update IPFS Hash should only alow valid inputs', async () => {
+        // First, we need a campaign to test against
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
+        // The campaignID is the zeroth position in the array as we have added exactly 1 campaign
+        let campaignID = await campaignManager.campaignCount() - 1
+
+        // The manager should only be able to change the hash if the campaign has not started yet
+        let newHash = "NEW HASH"
+        await campaignManager.updateIpfsHash(campaignID, newHash, {from:manager})
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[8], newHash, "IPFS hash should be correct")
+
+        let mollyHash = "BAD HASH"
+        // Someone who is NOT the manager should not be able to change the hash
+        await expectThrow(campaignManager.updateIpfsHash(campaignID, mollyHash, {
+            from: funder1
+        }), EVMRevert);
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[8], newHash, "IPFS hash should NOT have changed from the one set by the manager")
+
+        // Lastly check that the hash cant be changed after the campain has started
+        await increaseTimeTo(duringCampaignTime);
+        await expectThrow(campaignManager.updateIpfsHash(campaignID, ipfsHash, {
+            from: manager
+        }), EVMRevert);
+
+    });
 });

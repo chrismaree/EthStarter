@@ -131,7 +131,7 @@ contract CampaignManager is Ownable{
     */
     modifier campaignUnsuccessful(uint _campaignID) {
         require(now > campaigns[_campaignID].endingTime);
-        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal);
+        require(campaigns[_campaignID].balance < campaigns[_campaignID].goal);
         _;
     }
 
@@ -378,7 +378,10 @@ contract CampaignManager is Ownable{
             totalContributed += uint(campaigns[_campaignID].doners[msg.sender][i]);
         }
         // Take away their whole contribution from their profile. This means
-        // that if they try redraw again the sum total == 0
+        // that if they try redraw again the sum total == 0. The require is here
+        // to ensure that if the user calls again the function will not preform
+        // a transaction of 0 ether and will throw
+        require(totalContributed>0);
         campaigns[_campaignID].doners[msg.sender].push(-int(totalContributed));
         msg.sender.transfer(totalContributed);
     }
