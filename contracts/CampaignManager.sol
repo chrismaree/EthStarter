@@ -352,6 +352,10 @@ contract CampaignManager is Ownable{
         campaignSucceeded(_campaignID)
         campaignNotFunded(_campaignID)
     {
+        // Note that we dont have to change the balance of the campaign as we
+        // prevent double withdraws by checking the state of the campaign. 
+        // Leaving the balance within the campaign enables an easy way to sender
+        // the total funds sent to the campaign.
         campaigns[_campaignID].state = State.Funded;
         msg.sender.transfer(campaigns[_campaignID].balance);
     }

@@ -200,12 +200,62 @@ contract('CampaignManager', function (accounts) {
         // cant make a sucesseeding campaign fail with a withdraw
         await expectThrow(campaignManager.reduceDontation(campaignID, ether(3), {
             from: funder2
-        }), EVMRevert);;
+        }), EVMRevert);
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
+        
+        // Last thing to check is that a doner cant withdraw after the campaign has finished
+        await increaseTimeTo(afterEndingTime);
+        await expectThrow(campaignManager.reduceDontation(campaignID, ether(3), {
+            from: funder2
+        }), EVMRevert);
+    
     })
 
-    it('Withdraw Campaign Funds should only alow valid inputs', async () => {})
+    it('Withdraw Campaign Funds should only alow valid inputs', async () => {
+        // First, we need a campaign to test against
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
+        //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
+        let campaignID = await campaignManager.campaignCount() - 1
+
+        // Set time to during the campaign and then try fund it.
+        await increaseTimeTo(duringCampaignTime);
+        await campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation*2.5 //we want to fund the campaign such that it is above the goal but less than the cap. this = 12.5 ether
+        })
+
+        let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0]*2.5, "Balance should be equal to the donation amount")
+
+        
+        // Ensure that the manager can withdraw before the campaign has ended
+        await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
+            from: manager
+        }), EVMRevert);
+
+        // Ensure that non-managers can't withdraw campaign
+        await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
+            from: funder1
+        }), EVMRevert);
+        
+        
+        // Next, we set the time to be after the end of the campaign so the manager can try withdraw the funds
+        await increaseTimeTo(afterEndingTime);
+        
+        await campaignManager.withdrawCampaignFunds(campaignID, {from: manager});
+
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[6]['c'][0], 2, "State should be set to Funded(2)")
+
+        // Ensure that the manager can't withdraw twice from the same campaign
+        await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
+            from: manager
+        }), EVMRevert);
+
+    })
     
 });
