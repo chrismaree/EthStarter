@@ -39,7 +39,7 @@ contract('CampaignManager', function (accounts) {
         startingTime = (await latestTime()) + duration.weeks(1);
         duringCampaignTime = startingTime + duration.days(1)
         endingTime = startingTime + duration.weeks(1);
-        afterendingTime = endingTime + duration.days(1);
+        afterEndingTime = endingTime + duration.days(1);
         campaignManager = await CampaignManager.deployed();
     });
 
@@ -128,6 +128,13 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[6]['c'][0], 1, "State should be set to Started(1)")
         assert.equal(campaignValues[7].length, 1, "There should be 1 funder")
         assert.equal(campaignValues[7][0], funder1, "Only Funder address should be funder1")
+      
+        // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
+        await increaseTimeTo(afterEndingTime);
         
+        await expectThrow(campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation
+        }), EVMRevert);
     })
 });
