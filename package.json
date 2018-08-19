@@ -11,9 +11,11 @@
   "dependencies": {
     "async": "^2.6.1",
     "async-waterfall": "^0.1.5",
+    "chai": "^4.1.2",
     "element-ui": "^2.4.6",
     "ipfs": "^0.31.4",
     "orbit-db": "^0.19.9",
+    "pify": "^4.0.0",
     "truffle-contract": "^3.0.6",
     "vue": "^2.5.17",
     "vue-form": "^4.9.0",

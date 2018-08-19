@@ -37,17 +37,17 @@ contract CampaignManager is Ownable{
     }
     
     /** @dev store the total number of campaigns. Useful for retreving all of them **/
-    uint campaignCount;
+    uint public campaignCount;
     
     /**
     * @dev Stop the creation of new campagins
     */
-    bool emergencyStop_stopCreation = false;
+    bool public emergencyStop_stopCreation = false;
     
     /**
     * @dev stops the fundion of existing campagins
     */
-    bool emergencyStop_stopFunding = false;
+    bool public emergencyStop_stopFunding = false;
     
     /** @dev store all campaigns as a mapping to their unique ID **/
     mapping(uint=>Campaign) public campaigns;
@@ -257,7 +257,7 @@ contract CampaignManager is Ownable{
     * @param _cap value of the campaign (in ETH)
     * @param _ipfsHash represents the campain information on IPFS in a hash
     */
-    function createCamaign(
+    function createCampaign(
         uint _startingTime, 
         uint _endingTime, 
         uint _goal, 
@@ -268,6 +268,7 @@ contract CampaignManager is Ownable{
         validNewCampaignTime(_startingTime,_endingTime)
         validNewCampaignFunding(_goal,_cap)
         emergencyStop_Creation
+        returns(uint)
     {
         address[] memory emptydonersAddresses;
         campaigns[campaignCount] = Campaign({
@@ -282,6 +283,7 @@ contract CampaignManager is Ownable{
             ipfsHash: _ipfsHash
         });
         campaignCount += 1;
+        return campaignCount;
     }
     
     /**
