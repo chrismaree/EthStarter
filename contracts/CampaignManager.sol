@@ -306,9 +306,9 @@ contract CampaignManager is Ownable{
         campaigns[_campaignID].doners[msg.sender].push(int(msg.value));
         // There is no point in storing a doners address multiple times in the
         //donersAddresses array so only add if you this is your first contribution
-        if(campaigns[_campaignID].doners[msg.sender].length==0){
+        // if(campaigns[_campaignID].doners[msg.sender].length==0){
             campaigns[_campaignID].donersAddresses.push(msg.sender);         
-        }
+        // }
         if (campaigns[_campaignID].state != State.Running){
             campaigns[_campaignID].state = State.Running;
         }
@@ -387,10 +387,43 @@ contract CampaignManager is Ownable{
     * @param _newHash defines the new IPFS hash for the campaign
     */
     function updateIpfsHash(uint _campaignID, string _newHash)
-    public
-    onlyManager(_campaignID)
-    campaignNotStarted(_campaignID)
+        public
+        onlyManager(_campaignID)
+        campaignNotStarted(_campaignID)
     {
         campaigns[_campaignID].ipfsHash = _newHash;
     }
+    
+    function fetchCampaign(uint _campaignID)
+        public
+        returns
+        (address manager,
+        uint startingTime,
+        uint endingTime,
+        uint balance,
+        uint goal,
+        uint cap,
+        State state,
+        address[] donersAddresses,
+        string ipfsHash)
+    {
+        manager = campaigns[_campaignID].manager;
+        startingTime = campaigns[_campaignID].startingTime;
+        endingTime = campaigns[_campaignID].endingTime;
+        balance = campaigns[_campaignID].balance;
+        goal = campaigns[_campaignID].goal;
+        cap = campaigns[_campaignID].cap;
+        state = campaigns[_campaignID].state;
+        donersAddresses = campaigns[_campaignID].donersAddresses;
+        ipfsHash = campaigns[_campaignID].ipfsHash;
+        return (manager, startingTime, endingTime, balance, goal, cap, state, donersAddresses, ipfsHash);
+    }
+    
+    function fetchCampaignDoners(uint _campaignID)
+        public
+        returns (address[] donersAddresses)
+    {
+        donersAddresses = campaigns[_campaignID].donersAddresses;
+    }
+    
 }
