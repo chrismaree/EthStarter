@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "coverage": "./node_modules/.bin/solidity-coverage"
   },
   "dependencies": {
     "async": "^2.6.1",
@@ -14,6 +15,7 @@
     "chai": "^4.1.2",
     "element-ui": "^2.4.6",
     "ipfs": "^0.31.4",
+    "openzeppelin-solidity": "^1.12.0",
     "orbit-db": "^0.19.9",
     "pify": "^4.0.0",
     "truffle-contract": "^3.0.6",
@@ -30,6 +32,7 @@
     "@vue/cli-service": "^3.0.0",
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.1",
+    "solidity-coverage": "^0.5.7",
     "vue-template-compiler": "^2.5.17"
   },
   "eslintConfig": {

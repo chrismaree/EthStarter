@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./Ownable.sol";
+// EPM Library Usage
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /** @title A managment contract to store and manage all Campains for the platform.
 * This enables users to create new campagins and then other users can fund them.
@@ -112,10 +114,6 @@ contract CampaignManager is Ownable{
         _;
     }
     
-
-    
-
-    
     /**
     * @dev checks if the campain has Succeeded (donation > than goal)
     * @param _campaignID unique identifer of the campaign
@@ -215,7 +213,7 @@ contract CampaignManager is Ownable{
     * @dev Prevents the creation of new campaigns
     */
     modifier emergencyStop_Creation(){
-        assert(!emergencyStop_stopCreation);
+        require(emergencyStop_stopCreation == false);
         _;
     }
     
@@ -223,7 +221,7 @@ contract CampaignManager is Ownable{
     * @dev Prevents the funding of new campaigns
     */
     modifier emergencyStop_Funding(){
-        assert(!emergencyStop_stopFunding);
+        require(emergencyStop_stopFunding == false);
         _;
     }
     

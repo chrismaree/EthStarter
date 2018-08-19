@@ -49,8 +49,6 @@ contract('CampaignManager', function (accounts) {
         campaignManager = await CampaignManager.new();
     });
 
-
-
     it('Constructor correctly deployes contract and assigns owner', async () => {
         const contractOwner = await campaignManager.owner()
         assert.equal(contractOwner, owner, 'Owner should be set on construction');
@@ -88,7 +86,6 @@ contract('CampaignManager', function (accounts) {
         await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, cap, ipfsHash, {
             from: manager
         }), EVMRevert);
-
 
         // Checks that even if the end time is > than the starting time, but both are less than current time
         // the construction of a new campaign should still thow
@@ -142,7 +139,6 @@ contract('CampaignManager', function (accounts) {
             from: funder1,
             value: cap //This value doesent matter as long as it + the current balance is > than cap. just use cap to keep it simple
         }), EVMRevert);
-
 
         // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
         await increaseTimeTo(afterEndingTime);
@@ -242,7 +238,6 @@ contract('CampaignManager', function (accounts) {
             from: funder1
         }), EVMRevert);
 
-
         // Next, we set the time to be after the end of the campaign so the manager can try withdraw the funds
         await increaseTimeTo(afterEndingTime);
 
@@ -277,7 +272,7 @@ contract('CampaignManager', function (accounts) {
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0] * 1.5, "Balance should be equal to the donation amount")
 
-        
+
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
 
         //Should not be able to call this until the campaign has ended so check that it reverts
@@ -307,7 +302,9 @@ contract('CampaignManager', function (accounts) {
 
         // The manager should only be able to change the hash if the campaign has not started yet
         let newHash = "NEW HASH"
-        await campaignManager.updateIpfsHash(campaignID, newHash, {from:manager})
+        await campaignManager.updateIpfsHash(campaignID, newHash, {
+            from: manager
+        })
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[8], newHash, "IPFS hash should be correct")
 
@@ -324,6 +321,30 @@ contract('CampaignManager', function (accounts) {
         await expectThrow(campaignManager.updateIpfsHash(campaignID, ipfsHash, {
             from: manager
         }), EVMRevert);
-
     });
+
+    it('Emergency Stops should stop associated functionality', async () => {
+        // Standard creation of a campaign should be fine
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
+
+        let campaignID = await campaignManager.campaignCount() - 1
+        //Disable funding then fund. check throws
+        await campaignManager.enableEmergencyStop_Funding({
+            from: owner
+        })
+        await expectThrow(campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation
+        }), EVMRevert);
+        
+        //Disable creation then create. check throws
+        await campaignManager.enableEmergencyStop_Creation({
+            from: owner
+        })
+        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        }), EVMRevert);
+    })
 });
