@@ -1,3 +1,8 @@
+// All contract functionality is fully testing in the tests below. The testing structure
+// is to address each majour usecase of the contract, in accordance with the contract
+// interface. The time of the blockchain is modified using the advanceToBlock, increseTime
+// and latestTime javascript helpers to simulate particular points in time.
+
 const {
     ether
 } = require('./helpers/ether');
@@ -34,13 +39,14 @@ contract('CampaignManager', function (accounts) {
     before(async function () {
         await advanceBlock();
     });
-
+    // before each, the time must be recalculated to get exact values. This is not strictly needed
+    // but addes a level of precision to the tests.
     beforeEach(async function () {
         startingTime = (await latestTime()) + duration.weeks(1);
         duringCampaignTime = startingTime + duration.days(1)
         endingTime = startingTime + duration.weeks(1);
         afterEndingTime = endingTime + duration.days(1);
-        campaignManager = await CampaignManager.deployed();
+        campaignManager = await CampaignManager.new();
     });
 
 
@@ -55,11 +61,13 @@ contract('CampaignManager', function (accounts) {
 
     it('Create Campaign only allows valid inputs', async () => {
         // Valid inputs should add a new entry to the array
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {from: manager})
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
         let campaignCount = await campaignManager.campaignCount()
-        assert.equal(campaignCount,1,'New Campaign Should have been added to the array')
+        assert.equal(campaignCount, 1, 'New Campaign Should have been added to the array')
 
-        
+
         //Next, verify that all values are set to the correct values after initialisation
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
         let campaignID = await campaignManager.campaignCount() - 1
@@ -75,7 +83,7 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[6]['c'][0], 0, "State should be set to not started(0)")
         assert.equal(campaignValues[7].length, 0, "There should be no contributers")
         assert.equal(campaignValues[8], ipfsHash, "IPFS hash should be correct")
-        
+
         //check that if the start time is after the end time (swapped start and end times) constructor throws
         await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, cap, ipfsHash, {
             from: manager
@@ -97,7 +105,7 @@ contract('CampaignManager', function (accounts) {
 
         //Count should still be 1 as no new campaign should have been created in the previous tests
         campaignCount = await campaignManager.campaignCount()
-        
+
         assert.equal(campaignCount, 1, 'New Campaign Should have been added to the array')
     })
 
@@ -114,7 +122,7 @@ contract('CampaignManager', function (accounts) {
             from: funder1,
             value: validDonation
         }), EVMRevert);
-        
+
         // Set time to during the campaign and then try fund it. Check that can accept funds and they are correctly recived
         await increaseTimeTo(duringCampaignTime);
         await campaignManager.fundCampaign(campaignID, {
@@ -123,18 +131,81 @@ contract('CampaignManager', function (accounts) {
         })
 
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        
+
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
         assert.equal(campaignValues[6]['c'][0], 1, "State should be set to Started(1)")
         assert.equal(campaignValues[7].length, 1, "There should be 1 funder")
         assert.equal(campaignValues[7][0], funder1, "Only Funder address should be funder1")
-      
+
+        // We need to check that if the funder addes enough to exceed the cap, it fails. At this point, we are at 5 ether in the fund
+        await expectThrow(campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: cap //This value doesent matter as long as it + the current balance is > than cap. just use cap to keep it simple
+        }), EVMRevert);
+
+
         // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
         await increaseTimeTo(afterEndingTime);
-        
+
         await expectThrow(campaignManager.fundCampaign(campaignID, {
             from: funder1,
             value: validDonation
         }), EVMRevert);
     })
+    it('Reduce Donation should only alow valid inputs', async () => {
+        // First, we need a campaign to test against
+        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+            from: manager
+        })
+        //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
+        let campaignID = await campaignManager.campaignCount() - 1
+
+        // Set time to during the campaign and then try fund it.
+        await increaseTimeTo(duringCampaignTime);
+        await campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation
+        })
+
+        let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
+
+        //Next, we want to reduce our donation by a set amount and check we get the ether back correctly and that the fund is reduced
+
+        let responce = await campaignManager.reduceDontation(campaignID, (validDonation/2), {
+            from: funder1
+        })
+
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], (validDonation['c'][0]) / 2, "Balance should be equal to the half the original donation amount")
+
+        // Need to check that the user cant withdraw more than they deposited. At this point, the user balance should be 2.5 ether. 
+        // Withdrawing by another validDonation should make their balance negative. this should get rejected
+
+        await expectThrow(campaignManager.reduceDontation(campaignID, validDonation, {
+            from: funder1
+        }), EVMRevert);
+
+        // Next, we will fund the campaign unitl it has exceeded it's goal(but below the cap) and check that the user cant make a passing
+        // campaign fail. After this funding, the fund should have a value of 12.5 eth. This is more than the goal but less than the cap
+        await campaignManager.fundCampaign(campaignID, {
+            from: funder2,
+            value: validDonation*2
+        })
+
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
+
+        // Now get funder2 to try and withdraw more than 2.5 ether, making the balance of the fund < the goal of 10. This should throw as you
+        // cant make a sucesseeding campaign fail with a withdraw
+        await expectThrow(campaignManager.reduceDontation(campaignID, ether(3), {
+            from: funder2
+        }), EVMRevert);;
+
+        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
+        assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
+    })
+
+    it('Withdraw Campaign Funds should only alow valid inputs', async () => {})
+    
 });

@@ -165,8 +165,8 @@ contract CampaignManager is Ownable{
     * @param _value is the amount that the donar wants to reduce their donation by
     */
     modifier campaignWillNotDropBelowGoal(uint _campaignID, uint _value) {
-        if(campaigns[_campaignID].balance>campaigns[_campaignID].cap){
-            require(campaigns[_campaignID].balance-_value > campaigns[_campaignID].cap);
+        if(campaigns[_campaignID].balance>campaigns[_campaignID].goal){
+            require(campaigns[_campaignID].balance-_value > campaigns[_campaignID].goal);
         }
         _;
     }
@@ -331,7 +331,7 @@ contract CampaignManager is Ownable{
         campaignWillNotDropBelowGoal(_campaignID, _value)
         adequetDonationToReduce(_campaignID, _value)
     {
-        campaigns[_campaignID].balance - _value;
+        campaigns[_campaignID].balance -= _value;
         // store the reduction in the doners respective array as a negative value
         // preserving a history of reductions. The sum of this array is their
         // respective donation
@@ -396,6 +396,7 @@ contract CampaignManager is Ownable{
     
     function fetchCampaign(uint _campaignID)
         public
+        view
         returns
         (address manager,
         uint startingTime,
@@ -418,12 +419,4 @@ contract CampaignManager is Ownable{
         ipfsHash = campaigns[_campaignID].ipfsHash;
         return (manager, startingTime, endingTime, balance, goal, cap, state, donersAddresses, ipfsHash);
     }
-    
-    function fetchCampaignDoners(uint _campaignID)
-        public
-        returns (address[] donersAddresses)
-    {
-        donersAddresses = campaigns[_campaignID].donersAddresses;
-    }
-    
 }
