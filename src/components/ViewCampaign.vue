@@ -2,13 +2,17 @@
   <div class="ViewCampaign">
     
     <h1>campaignID {{ campaignID }}</h1>
-        {{ipfsReturnedData.name}}<br>
-        {{ipfsReturnedData.country}}<br>
-        {{ipfsReturnedData.shortDescription}}<br>
-        {{ipfsReturnedData.date}}<br>
-        {{ipfsReturnedData.goalCap}}<br>
-        {{ipfsReturnedData.type}}<br>
-       
+        Status: {{CampaignStatus}}<br>
+        Time: {{CampaignStatusTime}}<br>
+        Name: {{ipfsReturnedData.name}}<br>
+        Country: {{ipfsReturnedData.country}}<br>
+        Description: {{ipfsReturnedData.shortDescription}}<br>
+        Date: {{ipfsReturnedData.date}}<br>
+        Goal and Cap: {{ipfsReturnedData.goalCap}}<br>
+        Type: {{ipfsReturnedData.type}}<br>
+        Manager: {{contractReturnedData[0]}}<br>
+        Campaign Balance: {{contractReturnedData[3]}}<br>
+        Funders: {{contractReturnedData[7]}}<br>
        
     <div v-html="ipfsReturnedData.longDescription"></div>
     <img class="preview" :src="ipfsReturnedData.imageData">
@@ -32,8 +36,29 @@ export default {
   },
   data() {
     return {
+      //Data returned from the contract is in the followign format as an array:
+      // [0-> address manager,
+      // 1-> uint startingTime,
+      // 2-> uint endingTime,
+      // 3-> uint balance,
+      // 4-> uint goal,
+      // 5-> uint cap,
+      // 6-> State state,
+      // 7-> address[] donersAddresses,
+      // 8-> string ipfsHash]
       contractReturnedData: [],
-      ipfsReturnedData: {}
+
+      // Object that populates ipfsReturnedData is the same as that from CreateNewCampaignTable as
+      // {imageData, name, country, shortDescription, date, goalCap, type, longDescription}
+
+      // }
+      ipfsReturnedData: {},
+
+      CampaignStatus: "", //Stores either: NotStarted, Running, Funded, UnderFunded.
+      //same notion as in the contracts but here we need to calculate on the client side to
+      //identify things like if: a fund is finished but unclaimed, it will still say Running on chain
+      //Data is stored as: d, h, m, s;
+      CampaignStatusTime: ""
     };
   },
   methods: {
@@ -44,6 +69,43 @@ export default {
       // is worth it here until I can think of a better way to do it while keeping effecient
       console.log(this.contractReturnedData[8]);
       this.ipfsReturnedData = await viewFile(this.contractReturnedData[8]);
+      await this.identifyCampaignStatus(this.contractReturnedData);
+    },
+
+    convertSeconds(s) {
+      var d, h, m;
+      m = Math.floor(s / 60);
+      s = s % 60;
+      h = Math.floor(m / 60);
+      m = m % 60;
+      d = Math.floor(h / 24);
+      h = h % 24;
+      return { d: d, h: h, m: m, s: s };
+    },
+
+    async identifyCampaignStatus(contractData) {
+      let currentTime = new Date() / 1000;
+      console.log(this.convertSeconds(contractData[1] - currentTime))
+      //Has not started. current time less than the start time
+      if (currentTime < contractData[1]) {
+        this.CampaignStatus = "Not Started";
+        let timeBetween = this.convertSeconds(contractData[1] - currentTime);
+        console.log(timeBetween)
+        this.CampaignStatusTime = "Campaign Startins in " + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds";
+      }
+      //Is running. The current time is more than the start time, but less then the end time
+      if (currentTime > contractData[1] && currentTime < contractData[2]) {
+        this.CampaignStatus = "Running";
+        let timeBetween = this.convertSeconds(contractData[2] - currentTime);
+        this.CampaignStatusTime = "Campaign ends in " + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds";
+      }
+      //Is Over. The current time is more than the end time
+      if (currentTime > contractData[2]) {
+        this.CampaignStatus = "Ended";
+        let timeBetween = convertSeconds(contractData[2] - currentTime);
+        this.CampaignStatusTime = "Campaign ended " + + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds" + "ago";
+      }
+      console.log();
     }
   },
   async mounted() {

@@ -1,18 +1,22 @@
 <template>
-  <div class="hello">
-  This is text
+  <div class="FundCampaign">
+  {{CampaignID}}
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'FundCampaign',
   props: {
-    msg: String
+    CampaignID: Number
   }
 }
 </script>
-
+import {
+  loadCampaignManager,
+  fundCampaign
+  
+} from "../../utils/CampaignManagerInterface";
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 h3 {
