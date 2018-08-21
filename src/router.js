@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import EthereumContracts from './views/EthereumContracts.vue'
 import IPFSExamples from './views/IPFSExamples.vue'
 import CreateNewCampaign from './views/CreateNewCampaign.vue'
+import ViewCampaigns from './views/ViewCampaigns.vue'
 
 Vue.use(Router)
 
@@ -28,6 +29,21 @@ export default new Router({
             path: '/CreateNewCampaign',
             name: 'CreateNewCampaign',
             component: CreateNewCampaign
-        }
+        },
+        {
+            path: '/ViewCampaigns',
+            name: 'ViewCampaigns',
+            component: ViewCampaigns
+        },
+        // {
+        //     path: '/CreateNewCampaign',
+        //     name: 'CreateNewCampaign',
+        //     component: CreateNewCampaign
+        // },
+        // {
+        //     path: '/CreateNewCampaign',
+        //     name: 'CreateNewCampaign',
+        //     component: CreateNewCampaign
+        // },
     ]
 })

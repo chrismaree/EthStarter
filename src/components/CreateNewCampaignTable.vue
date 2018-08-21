@@ -129,18 +129,26 @@ export default {
       }
     },
     async onSubmit() {
-      // let createdAddress = await uploadFile(this.form);
-      // this.$data.createdAddress = createdAddress;
-
-      // await loadCampaignManager()
-      // let createdCampaign = await createNewCampaign()
-      console.log(this.form.date[0])
-      console.log(Math.floor(Date.parse(this.form.date[0])/1000))
+      let createdAddress = await uploadFile(this.form);
+      let startTime = Math.floor(Date.parse(this.form.date[0]) / 1000);
+      let endTime = Math.floor(Date.parse(this.form.date[1]) / 1000);
+      let goal = this.form.goalCap[0];
+      let cap = this.form.goalCap[1];
+      let campaignTx = await createNewCampaign(
+        startTime,
+        endTime,
+        goal,
+        cap,
+        createdAddress
+      );
     },
     async loadHash() {
       let returnedValue = await viewFile(this.$data.loadAddress);
       this.$data.retreivedText = returnedValue;
     }
+  },
+  async mounted(){
+    await loadCampaignManager()
   }
 };
 </script>

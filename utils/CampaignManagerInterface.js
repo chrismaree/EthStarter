@@ -74,8 +74,6 @@ const fetchCampaign = async (_campaignID) => {
 }
 
 
-
-
 // const setSimpleStorageValue = async (c) => {
 //     const transaction = c.contract.set(c.value, {
 //         from: c.from,

@@ -7,6 +7,7 @@
       <router-link to="/EthereumContracts">Ethereum Contracts </router-link> |
       <router-link to="/IPFSExamples">IPFS Examples</router-link> |
       <router-link to="/CreateNewCampaign">Create New Campaign</router-link> |
+      <router-link to="/ViewCampaigns">View Campaigns</router-link>
   </el-header>
   <el-main>
     <router-view/>
