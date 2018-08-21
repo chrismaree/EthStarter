@@ -1,15 +1,19 @@
 <template>
 <div class="CreateNewCampaignTable">
-<el-form ref="form" :model="form" label-width="400px">
-  <el-form-item label="Campaign name">
+<el-form ref="form" :model="form" label-width="150px">
+<el-row>
+  <el-col :span="7" :offset="6">
+    <el-form-item label="Campaign name">
     <el-input v-model="form.name"></el-input>
   </el-form-item>
   <el-form-item label="Campaign Country">
     <el-input v-model="form.country"></el-input>
   </el-form-item>
+  <el-form-item label="Short Description">
+        <el-input type="textarea" v-model="form.shortDescription"></el-input>
+  </el-form-item>
   <el-form-item label="Start and End date">
      <div class="block">
-    <span class="demonstration">Default</span>
     <el-date-picker
       v-model="form.date"
       type="datetimerange"
@@ -19,7 +23,24 @@
     </el-date-picker>
   </div>
   </el-form-item>
-  <el-form-item label="Campaign Type">
+  
+  </el-col>
+  <el-col :span="5">
+    
+    
+                Campaign Image
+                <input type="file" @change="previewImage" accept="image/*">
+            
+            <div class="image-preview" v-if="form.imageData.length > 0">
+                <img class="preview" :src="form.imageData">
+            </div>
+  </el-col>
+</el-row>
+
+  <el-row>
+    <el-col :span="15" :offset="6">
+
+<el-form-item label="Campaign Type">
     <el-checkbox-group v-model="form.type">
       <el-checkbox label="Charity Fund Raising" name="type"></el-checkbox>
       <el-checkbox label="Community Initiative" name="type"></el-checkbox>
@@ -38,17 +59,22 @@
     </el-slider>
   </div>
   </el-form-item>
-  
-  <tinymce id="d1" 
+
+
+<tinymce id="d1" 
             :other_options="tinyOptions" 
-            v-model="form.description"
+            v-model="form.longDescription"
     ></tinymce>
-<br>
+    </el-col>
+  </el-row>
+
+  
+
   <el-form-item>
     <el-button type="primary" @click="onSubmit">Create</el-button>
     <el-button>Cancel</el-button>
   </el-form-item>
-</el-form>
+</el-form>  
 
 {{ipfsCreatedAddress}}
 
@@ -62,38 +88,68 @@
 </div>
 </template>
 <script>
-import {uploadFile, viewFile} from "../../utils/IPFSUploader"
+import { uploadFile, viewFile } from "../../utils/IPFSUploader";
+import {
+  loadCampaignManager,
+  createNewCampaign
+} from "../../utils/CampaignManagerInterface";
 
 export default {
   name: "CreateNewCampaignTable",
   data() {
     return {
-        
       tinyOptions: {
         height: 500
       },
       form: {
+        imageData: "",
         name: "",
         country: "",
+        shortDescription: "",
         date: "",
         goalCap: [10, 15],
         type: [],
-        description: '<h2 style="color: #339966;">Hi there from EthStarter!</h2> <p>&nbsp;</p> <p><span>You can use this space to design and describe your campaign</span></p>',
+        longDescription:
+          '<h2 style="color: #339966;">Hi there from EthStarter!</h2> <p>&nbsp;</p> <p><span>You can use this space to design and describe your campaign</span></p>'
       },
-      ipfsCreatedAddress: '',
-      loadAddress: '',
-                retreivedText: ''
+      ipfsCreatedAddress: "",
+      loadAddress: "",
+      retreivedText: ""
     };
   },
   methods: {
+    previewImage: function(event) {
+      var input = event.target;
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = e => {
+          this.form.imageData = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    },
     async onSubmit() {
-      let createdAddress = await uploadFile(this.form)
-                this.$data.createdAddress = createdAddress
+      // let createdAddress = await uploadFile(this.form);
+      // this.$data.createdAddress = createdAddress;
+
+      // await loadCampaignManager()
+      // let createdCampaign = await createNewCampaign()
+      console.log(this.form.date[0])
+      console.log(Math.floor(Date.parse(this.form.date[0])/1000))
     },
     async loadHash() {
-               let returnedValue = await viewFile(this.$data.loadAddress)
-               this.$data.retreivedText = returnedValue
-            }
+      let returnedValue = await viewFile(this.$data.loadAddress);
+      this.$data.retreivedText = returnedValue;
+    }
   }
 };
 </script>
+
+<style>
+img.preview {
+  width: 200px;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+</style>

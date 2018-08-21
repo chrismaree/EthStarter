@@ -1,3 +1,4 @@
+import store from '../src/store'
 import Web3 from 'web3'
 import contract from 'truffle-contract'
 import contractJSON from '../build/contracts/CampaignManager.json'
@@ -19,9 +20,61 @@ const loadCampaignManager = async (c) => {
 }
 
 
-// const getSimpleStorageValue = async (c) => {
-//     return c.get()
-// }
+const createNewCampaign = async (_startingTime, _endingTime, _goal, _cap, _ipfsHash) => {
+    return await contractInstance.createCampaign(_startingTime,
+        _endingTime,
+        _goal,
+        _cap,
+        _ipfsHash, {
+            from: store.state.defaultEthWallet,
+            gasPrice: 2000000000,
+            gas: '2000000'
+        })
+}
+
+const getNumberOfCampaigns = async () => {
+    return await contractInstance.campaignCount()
+}
+
+const fundCampaign = async (_campaignID, _value) => {
+    await contractInstance.fundCampaign(_campaignID, {
+        from: store.state.defaultEthWallet,
+        gasPrice: 2000000000,
+        gas: '2000000',
+        value: _value
+    })
+}
+
+const reduceDonation = async (_campaignID, _value) => {
+    await contractInstance.reduceDonation(_campaignID, _value, {
+        from: store.state.defaultEthWallet,
+        gasPrice: 2000000000,
+        gas: '2000000',
+    })
+}
+
+const refundFailedCampaign = async (_campaignID) => {
+    await contractInstance.reduceDonation(_campaignID, {
+        from: store.state.defaultEthWallet,
+        gasPrice: 2000000000,
+        gas: '2000000',
+    })
+}
+
+const withdrawCampaignFunds = async (_campaignID) => {
+    await contractInstance.withdrawCampaignFunds(_campaignID, {
+        from: store.state.defaultEthWallet,
+        gasPrice: 2000000000,
+        gas: '2000000',
+    })
+}
+
+const fetchCampaign = async (_campaignID) => {
+    return await contractInstance.fetchCampaign(_campaignID)
+}
+
+
+
 
 // const setSimpleStorageValue = async (c) => {
 //     const transaction = c.contract.set(c.value, {
@@ -33,5 +86,12 @@ const loadCampaignManager = async (c) => {
 // }
 
 export {
-    loadCampaignManager
+    loadCampaignManager,
+    createNewCampaign,
+    getNumberOfCampaigns,
+    fundCampaign,
+    reduceDonation,
+    refundFailedCampaign,
+    withdrawCampaignFunds,
+    fetchCampaign
 }
