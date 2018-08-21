@@ -1,23 +1,37 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
+  <div class="app">
+    
+<el-container>
+  <el-header class="nav">
+    <router-link to="/">Home</router-link> |
       <router-link to="/EthereumContracts">Ethereum Contracts </router-link> |
-      <router-link to="/IPFSExamples">IPFS Examples</router-link>
-    </div>
+      <router-link to="/IPFSExamples">IPFS Examples</router-link> |
+      <router-link to="/CreateNewCampaign">Create New Campaign</router-link> |
+  </el-header>
+  <el-main>
     <router-view/>
+  </el-main>
+</el-container>
+
+      
+    
+    
+
+
+
+    
   </div>
 </template>
 
 <style lang="scss">
-#app {
+.app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
-#nav {
+.nav {
   padding: 30px;
   a {
     font-weight: bold;

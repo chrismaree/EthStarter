@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import EthereumContracts from './views/EthereumContracts.vue'
 import IPFSExamples from './views/IPFSExamples.vue'
+import CreateNewCampaign from './views/CreateNewCampaign.vue'
 
 Vue.use(Router)
 
@@ -23,5 +24,10 @@ export default new Router({
             name: 'IPFSExamples',
             component: IPFSExamples
         },
+        {
+            path: '/CreateNewCampaign',
+            name: 'CreateNewCampaign',
+            component: CreateNewCampaign
+        }
     ]
 })

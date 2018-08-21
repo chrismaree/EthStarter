@@ -17,7 +17,6 @@
     </div>
 </template>
 <script>
-    // import {createDB, loadDB, addValueToLog, getValuesFromLog} from "../../utils/OrbitDB.js";
     import {uploadFile, viewFile} from "../../utils/IPFSUploader"
 
     export default {

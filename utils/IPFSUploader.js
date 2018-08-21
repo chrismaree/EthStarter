@@ -18,9 +18,10 @@ ipfs.on('ready', async () => {
     store.commit('setIPFSNetworkState', true)
 })
 
-const uploadFile = async (c) => {
+const uploadFile = async (_content) => {
+    let bufferContent = Buffer.from(JSON.stringify(_content));
     const filesAdded = await ipfs.files.add({
-        content: Buffer.from(c)
+        content: bufferContent
     })
     /*eslint no-console: ["error", { allow: ["warn", "error"] }] */
     console.log('Added file:', filesAdded[0].hash)
@@ -29,7 +30,7 @@ const uploadFile = async (c) => {
 
 const viewFile = async (c) => {
     const fileBuffer = await ipfs.files.cat(c)
-    return fileBuffer.toString()
+    return JSON.parse(fileBuffer.toString());
 }
 
 export {

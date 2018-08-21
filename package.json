@@ -22,6 +22,7 @@
     "vue": "^2.5.17",
     "vue-form": "^4.9.0",
     "vue-router": "^3.0.1",
+    "vue-tinymce-editor": "^1.6.2",
     "vuex": "^3.0.1",
     "web3": "^1.0.0-beta.35",
     "websocket": "^1.0.26"
@@ -30,6 +31,7 @@
     "@vue/cli-plugin-babel": "^3.0.0",
     "@vue/cli-plugin-eslint": "^3.0.0",
     "@vue/cli-service": "^3.0.0",
+    "element-theme-chalk": "^2.4.6",
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.1",
     "solidity-coverage": "^0.5.7",
