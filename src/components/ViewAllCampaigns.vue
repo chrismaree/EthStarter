@@ -1,61 +1,38 @@
 <template>
-  <div class="ViewCampaign">
-    <h1>campaignID {{ campaignID }}</h1>
-
-    <el-button @click="search" class="button is-primary is-fullwidth subtitle">Load Hash</el-button>
-
-    campaignData {{contractReturnedData}}
-
-    ipfsReturnedData {{ipfsReturnedData}}
-
-
-<hr>
-    <div v-html="ipfsReturnedData.longDescription"></div>
-    <img class="preview" :src="ipfsReturnedData.imageData">
-  </div>
+    <div class="ViewCampaign">
+       numberOfCampaigns {{numberOfCampaigns}}
+  <div v-for="index in numberOfCampaigns" :key="index">
+<ViewCampaign :campaignID="index-1" />
+        </div>
+    </div>
 </template>
 
 <script>
-import { viewFile } from "../../utils/IPFSUploader";
-
 import {
   loadCampaignManager,
-  getNumberOfCampaigns,
-  fetchCampaign
+  getNumberOfCampaigns
 } from "../../utils/CampaignManagerInterface";
 
+import ViewCampaign from "@/components/ViewCampaign.vue";
+
 export default {
-  name: "ViewCampaign",
+  name: "ViewAllCampaigns",
+  components: {
+    ViewCampaign
+  },
   props: {
     campaignID: Number
   },
   data() {
     return {
-      contractReturnedData: [],
-      ipfsReturnedData: {
-        imageData: "",
-        name: "",
-        country: "",
-        shortDescription: "",
-        date: "",
-        goalCap: [0, 0],
-        type: [],
-        longDescription: ""
-      }
+      numberOfCampaigns: 0
     };
   },
-  methods: {
-    async search() {
-      this.contractReturnedData = await fetchCampaign(this.campaignID);
-      // Note that this subindexing should potentually be done in the campaign manager interface
-      // but this extra seperation of conserns will make the process less efficiant. Coupling of layers
-      // is worth it here until I can think of a better way to do it while keeping effecient
-      console.log(this.contractReturnedData[8]);
-      this.ipfsReturnedData = await viewFile(this.contractReturnedData[8]);
-    }
-  },
+  methods: {},
   async mounted() {
     await loadCampaignManager();
+    this.numberOfCampaigns = await getNumberOfCampaigns();
+    this.numberOfCampaigns = parseInt(this.numberOfCampaigns);
   }
 };
 </script>

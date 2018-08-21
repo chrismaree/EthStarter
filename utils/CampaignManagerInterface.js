@@ -16,7 +16,7 @@ let contractInstance
 
 const loadCampaignManager = async (c) => {
     contractInstance = await Contract.at("0xc2d4a7b3024479a6b2b50864c04cbb5f52cb8700")
-    console.log(contractInstance.owner())
+    console.log("Contract Loaded")
 }
 
 
@@ -72,16 +72,6 @@ const withdrawCampaignFunds = async (_campaignID) => {
 const fetchCampaign = async (_campaignID) => {
     return await contractInstance.fetchCampaign(_campaignID)
 }
-
-
-// const setSimpleStorageValue = async (c) => {
-//     const transaction = c.contract.set(c.value, {
-//         from: c.from,
-//         gasPrice: 2000000000,
-//         gas: '2000000'
-//     })
-//     return transaction
-// }
 
 export {
     loadCampaignManager,

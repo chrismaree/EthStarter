@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 // EPM Library Usage
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Ownable.sol";
 
 
 /** @title A managment contract to store and manage all Campains for the platform.

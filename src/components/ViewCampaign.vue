@@ -1,17 +1,18 @@
 <template>
   <div class="ViewCampaign">
+    
     <h1>campaignID {{ campaignID }}</h1>
-
-    <el-button @click="search" class="button is-primary is-fullwidth subtitle">Load Hash</el-button>
-
-    campaignData {{contractReturnedData}}
-
-    ipfsReturnedData {{ipfsReturnedData}}
-
-
-<hr>
+        {{ipfsReturnedData.name}}<br>
+        {{ipfsReturnedData.country}}<br>
+        {{ipfsReturnedData.shortDescription}}<br>
+        {{ipfsReturnedData.date}}<br>
+        {{ipfsReturnedData.goalCap}}<br>
+        {{ipfsReturnedData.type}}<br>
+       
+       
     <div v-html="ipfsReturnedData.longDescription"></div>
     <img class="preview" :src="ipfsReturnedData.imageData">
+    <hr>
   </div>
 </template>
 
@@ -32,7 +33,7 @@ export default {
   data() {
     return {
       contractReturnedData: [],
-      ipfsReturnedData: {},
+      ipfsReturnedData: {}
     };
   },
   methods: {
@@ -47,6 +48,7 @@ export default {
   },
   async mounted() {
     await loadCampaignManager();
+    await this.search();
   }
 };
 </script>

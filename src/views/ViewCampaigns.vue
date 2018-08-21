@@ -1,18 +1,20 @@
 <template>
     <div class="ViewCampaigns">
         <br>
-        <ViewCampaign :campaignID=0 />
+        <ViewAllCampaigns/>
     </div>
 </template>
 
 <script>
     // @ is an alias to /src
     import ViewCampaign from '@/components/ViewCampaign.vue'
+    import ViewAllCampaigns from '@/components/ViewAllCampaigns.vue'
 
     export default {
         name: 'ViewCampaigns',
         components: {
-            ViewCampaign
+            ViewCampaign,
+            ViewAllCampaigns
         }
     }
 </script>
