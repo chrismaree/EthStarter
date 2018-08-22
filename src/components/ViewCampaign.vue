@@ -72,8 +72,9 @@ export default {
       await this.identifyCampaignStatus(this.contractReturnedData);
     },
 
-    convertSeconds(s) {
-      var d, h, m;
+    convertSeconds(seconds) {
+      var d, h, m, s;
+      s = parseInt(seconds)
       m = Math.floor(s / 60);
       s = s % 60;
       h = Math.floor(m / 60);
@@ -90,20 +91,20 @@ export default {
       if (currentTime < contractData[1]) {
         this.CampaignStatus = "Not Started";
         let timeBetween = this.convertSeconds(contractData[1] - currentTime);
-        console.log(timeBetween)
-        this.CampaignStatusTime = "Campaign Startins in " + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds";
+        this.CampaignStatusTime= "Campaign Starts in " + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds";
+        //  = 
       }
       //Is running. The current time is more than the start time, but less then the end time
       if (currentTime > contractData[1] && currentTime < contractData[2]) {
         this.CampaignStatus = "Running";
         let timeBetween = this.convertSeconds(contractData[2] - currentTime);
-        this.CampaignStatusTime = "Campaign ends in " + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds";
+        this.CampaignStatusTime = "Campaign ends in " + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds";
       }
       //Is Over. The current time is more than the end time
       if (currentTime > contractData[2]) {
         this.CampaignStatus = "Ended";
         let timeBetween = convertSeconds(contractData[2] - currentTime);
-        this.CampaignStatusTime = "Campaign ended " + + timeBetween.d + " days, " + timeBetween.h + " hours and " + timebetween.s +" seconds" + "ago";
+        this.CampaignStatusTime = "Campaign ended " + + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds" + "ago";
       }
       console.log();
     }
