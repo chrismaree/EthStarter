@@ -36,12 +36,13 @@ const getNumberOfCampaigns = async () => {
     return await contractInstance.campaignCount()
 }
 
+//Function assumes a fraction of ether from the front end so convert to Wei
 const fundCampaign = async (_campaignID, _value) => {
     await contractInstance.fundCampaign(_campaignID, {
         from: store.state.defaultEthWallet,
         gasPrice: 2000000000,
         gas: '2000000',
-        value: _value
+        value: _value * 1000000000000000000
     })
 }
 

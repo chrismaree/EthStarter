@@ -1,10 +1,11 @@
 <template>
   <div class="ViewCampaign">
     
-    <h1>campaignID {{ campaignID }}</h1>
+      <h1>Name: {{ipfsReturnedData.name}}</h1>
+        <img class="preview" :src="ipfsReturnedData.imageData"><br>
+        campaignID: {{ campaignID }}<br>
         Status: {{CampaignStatus}}<br>
         Time: {{CampaignStatusTime}}<br>
-        Name: {{ipfsReturnedData.name}}<br>
         Country: {{ipfsReturnedData.country}}<br>
         Description: {{ipfsReturnedData.shortDescription}}<br>
         Date: {{ipfsReturnedData.date}}<br>
@@ -13,9 +14,13 @@
         Manager: {{contractReturnedData[0]}}<br>
         Campaign Balance: {{contractReturnedData[3]}}<br>
         Funders: {{contractReturnedData[7]}}<br>
-       
     <div v-html="ipfsReturnedData.longDescription"></div>
-    <img class="preview" :src="ipfsReturnedData.imageData">
+    <br>
+    
+    <el-button @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
+    <el-input-number v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Eter
+
+    
     <hr>
   </div>
 </template>
@@ -26,7 +31,8 @@ import { viewFile } from "../../utils/IPFSUploader";
 import {
   loadCampaignManager,
   getNumberOfCampaigns,
-  fetchCampaign
+  fetchCampaign,
+  fundCampaign
 } from "../../utils/CampaignManagerInterface";
 
 export default {
@@ -50,15 +56,14 @@ export default {
 
       // Object that populates ipfsReturnedData is the same as that from CreateNewCampaignTable as
       // {imageData, name, country, shortDescription, date, goalCap, type, longDescription}
-
-      // }
       ipfsReturnedData: {},
 
       CampaignStatus: "", //Stores either: NotStarted, Running, Funded, UnderFunded.
       //same notion as in the contracts but here we need to calculate on the client side to
       //identify things like if: a fund is finished but unclaimed, it will still say Running on chain
       //Data is stored as: d, h, m, s;
-      CampaignStatusTime: ""
+      CampaignStatusTime: "",
+      fundingAmount: 0
     };
   },
   methods: {
@@ -67,14 +72,19 @@ export default {
       // Note that this subindexing should potentually be done in the campaign manager interface
       // but this extra seperation of conserns will make the process less efficiant. Coupling of layers
       // is worth it here until I can think of a better way to do it while keeping effecient
-      console.log(this.contractReturnedData[8]);
       this.ipfsReturnedData = await viewFile(this.contractReturnedData[8]);
-      await this.identifyCampaignStatus(this.contractReturnedData);
+      //update the display for the time every second
+      setInterval(
+        function() {
+          this.identifyCampaignStatus(this.contractReturnedData);
+        }.bind(this),
+        1000
+      );
     },
 
     convertSeconds(seconds) {
       var d, h, m, s;
-      s = parseInt(seconds)
+      s = parseInt(seconds);
       m = Math.floor(s / 60);
       s = s % 60;
       h = Math.floor(m / 60);
@@ -84,29 +94,52 @@ export default {
       return { d: d, h: h, m: m, s: s };
     },
 
-    async identifyCampaignStatus(contractData) {
+    identifyCampaignStatus(contractData) {
       let currentTime = new Date() / 1000;
-      console.log(this.convertSeconds(contractData[1] - currentTime))
       //Has not started. current time less than the start time
       if (currentTime < contractData[1]) {
         this.CampaignStatus = "Not Started";
         let timeBetween = this.convertSeconds(contractData[1] - currentTime);
-        this.CampaignStatusTime= "Campaign Starts in " + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds";
-        //  = 
+        this.CampaignStatusTime =
+          "Campaign Starts in " +
+          timeBetween["d"] +
+          " days, " +
+          timeBetween["h"] +
+          " hours and " +
+          timeBetween["s"] +
+          " seconds";
       }
       //Is running. The current time is more than the start time, but less then the end time
       if (currentTime > contractData[1] && currentTime < contractData[2]) {
         this.CampaignStatus = "Running";
         let timeBetween = this.convertSeconds(contractData[2] - currentTime);
-        this.CampaignStatusTime = "Campaign ends in " + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds";
+        this.CampaignStatusTime =
+          "Campaign ends in " +
+          timeBetween["d"] +
+          " days, " +
+          timeBetween["h"] +
+          " hours and " +
+          timeBetween["s"] +
+          " seconds";
       }
       //Is Over. The current time is more than the end time
       if (currentTime > contractData[2]) {
         this.CampaignStatus = "Ended";
         let timeBetween = convertSeconds(contractData[2] - currentTime);
-        this.CampaignStatusTime = "Campaign ended " + + timeBetween['d'] + " days, " + timeBetween['h'] + " hours and " + timeBetween['s'] +" seconds" + "ago";
+        this.CampaignStatusTime =
+          "Campaign ended " +
+          +timeBetween["d"] +
+          " days, " +
+          timeBetween["h"] +
+          " hours and " +
+          timeBetween["s"] +
+          " seconds" +
+          "ago";
       }
-      console.log();
+    },
+    async fundCurrentCampaign(){
+      console.log(this.fundingAmount)
+      await fundCampaign(this.campaignID, this.fundingAmount)
     }
   },
   async mounted() {
