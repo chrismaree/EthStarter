@@ -2,7 +2,7 @@
 <div class="CreateNewCampaignTable">
 <el-form ref="form" :model="form" label-width="150px">
 <el-row>
-  <el-col :span="7" :offset="6">
+  <el-col :span="9" :offset="6">
     <el-form-item label="Campaign name">
     <el-input v-model="form.name"></el-input>
   </el-form-item>
@@ -69,10 +69,10 @@
   </el-row>
 
   
-
+<br>
   <el-form-item>
     <el-button type="primary" @click="onSubmit">Create</el-button>
-    <el-button>Cancel</el-button>
+    
   </el-form-item>
 </el-form>  
 
@@ -148,9 +148,10 @@ export default {
 
 <style>
 img.preview {
-  width: 200px;
+  width: 300px;
   background-color: white;
   border: 1px solid #ddd;
   padding: 5px;
+  text-align: center;
 }
 </style>

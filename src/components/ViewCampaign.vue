@@ -1,44 +1,62 @@
 <template>
   <div class="ViewCampaign">
     
-      <h1>Name: {{ipfsReturnedData.name}}</h1>
-        <img class="preview" :src="ipfsReturnedData.imageData"><br>
-        campaignID: {{ campaignID }}<br>
-        Country: {{ipfsReturnedData.country}}<br>
-        Description: {{ipfsReturnedData.shortDescription}}<br>
-        Date: {{ipfsReturnedData.date}}<br>
-        Goal and Cap: {{ipfsReturnedData.goalCap}}<br>
-        Type: {{ipfsReturnedData.type}}<br>
-        Manager: {{contractReturnedData[0]}}<br>
-        Campaign Balance: {{contractReturnedData[3]}}<br>
-        Funders: {{contractReturnedData[7]}}<br>
-    <div v-html="ipfsReturnedData.longDescription"></div>
+<el-row>
+  <el-col :span="12">
+    <h1>{{ipfsReturnedData.name}}</h1>
+        {{ipfsReturnedData.shortDescription}}
+        <br>
+        <br>
+        <br>
+        <img class="preview" :src="ipfsReturnedData.imageData">
+  </el-col>
+  <el-col :span="12">
+          <el-table
+          border
+          stripe
+          size="small"
+          :show-header=false
+      :data="tableData"
+      style="width: 100%">
+      <el-table-column
+        prop="propery"
+        width="200"
+        >
+      </el-table-column>
+      <el-table-column
+        prop="value"
+        >
+      </el-table-column>
+    </el-table></el-col>
+</el-row>
+
+      <br>
+    <div class="campaignText" v-html="ipfsReturnedData.longDescription"></div>
     <br>
-    <br>
-    Status: {{CampaignStatus}}<br>
-        Time: {{CampaignStatusTime}}<br>
-    
+    <strong>Status:</strong> {{CampaignStatus}} | 
+        {{CampaignStatusTime}}<br>
+    <h2>Fund Campaign</h2>
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
 <br>
 <div v-if="isFunder && !failedCampaign">
-    <p><strong>You have contributed to this probject!</strong> If the campaign has not ended you can reduce your donation. <br> Please not that you can only with reduce your donation if it wont make a passing campaign fail.</p>
+    <p><strong>You have contributed to this project!</strong> If the campaign has not ended you can reduce your donation. <br> Please not that you can only with reduce your donation if it wont make a passing campaign fail.</p>
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="reduceAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="donerReduceDonationAmount" type="primary">Reduce Donation</el-button>
   </div>
 
     <div v-if="isFunder && failedCampaign">
-    <p><strong>You have contributed to this probject!</strong>. However, the campaign has ended and it failed!<br> You can withdraw your donation </p>
+    <p><strong>You have contributed to this project!</strong>. However, the campaign has ended and it failed!<br> You can withdraw your donation </p>
     <el-button @click="withdrawFromFailedCampaign" type="primary">Withdraw Donation</el-button>
     </div>
 
 <div v-if="isManager && !failedCampaign">
-    <p><strong>You manage to this probject!</strong> If the campaign has ended and was successful, you can withdraw all the donation funds.</p>
-    <el-button :disabled="CampaignStatus!='Ended'" @click="managerWithdrawFromCampaign" type="primary">Withdraw from campaign</el-button>
+    <p><strong>You are the manager for this project!</strong> If the campaign has ended and was successful, you can withdraw all the donation funds.</p>
+    <el-button :disabled="CampaignStatus!='Ended'" @click="managerWithdrawFromCampaign" type="primary">Withdraw From Campaign</el-button>
   </div>
 
   <div v-if="isManager && failedCampaign">
-    <p><strong>You manage to this probject!</strong>. However, the campaign has ended and it failed! </p>
+    <p><strong>You manage to this project!</strong>. However, the campaign has ended and it failed! </p>
     </div>
   <hr>
 </div>
@@ -89,7 +107,8 @@ export default {
       isFunder: false,
       isManager: false,
       reduceAmount: 0,
-      failedCampaign: false
+      failedCampaign: false,
+      tableData: []
     };
   },
   methods: {
@@ -108,8 +127,60 @@ export default {
       );
       await this.identifyIfContributer();
       await this.identifyIfManager();
+      this.generateTable()
     },
 
+    generateTable(){
+      let type = "";
+      for (let i = 0; i < this.ipfsReturnedData.type.length; i++) {
+        type += this.ipfsReturnedData.type[i] + ", ";
+      }
+      type = type.substring(0, type.length - 2);
+
+      let balance = this.contractReturnedData[3];
+      if (balance == undefined || balance == 0) {
+        balance = "0";
+      }
+
+      let funders = this.contractReturnedData[7];
+      let fundersString='';
+      if (funders == [] || funders == "") {
+        fundersString = "None yet...";
+      } else {
+        for (let i = 0; i < funders.length; i++) {
+          funders[i] = funders[i].replace(funders[i].substring(5, 37), "...");
+        }
+        for (let i = 0; i < funders.length; i++) {
+          fundersString += funders[i] + ", ";
+        }
+      
+        fundersString = fundersString.substring(0, fundersString.length - 2);
+      }
+      
+      this.date =
+        this.ipfsReturnedData.date[0]
+          .substring(0, this.ipfsReturnedData.date[0].length - 5)
+          .replace("T", " ") +
+        " to " +
+        this.ipfsReturnedData.date[1]
+          .substring(0, this.ipfsReturnedData.date[1].length - 5)
+          .replace("T", " ");
+      let manager = this.contractReturnedData[0].replace(
+        this.contractReturnedData[0].substring(5, 37),
+        "..."
+      );
+
+      this.tableData = [
+        { propery: "Campaign Country", value: this.ipfsReturnedData.country },
+        { propery: "Funding Date", value: this.date },
+        { propery: "Goal", value: this.ipfsReturnedData.goalCap[0] + " Ether" },
+        { propery: "Cap", value: this.ipfsReturnedData.goalCap[1] + " Ether" },
+        { propery: "Type", value: type },
+        { propery: "Manager", value: manager },
+        { propery: "Campaign Balance", value: balance },
+        { propery: "Funders", value: fundersString }
+      ];
+    },
     convertSeconds(seconds) {
       var d, h, m, s;
       s = parseInt(seconds);
@@ -200,9 +271,12 @@ export default {
         this.isManager = true;
       }
     },
-    async identifyIfFailedCampaign(){
-      if(this.CampaignStatus=="Ended" && this.contractReturnedData[3]<this.contractReturnedData[4]){
-        this.failedCampaign = true
+    async identifyIfFailedCampaign() {
+      if (
+        this.CampaignStatus == "Ended" &&
+        this.contractReturnedData[3] < this.contractReturnedData[4]
+      ) {
+        this.failedCampaign = true;
       }
     },
     async managerWithdrawFromCampaign() {
@@ -211,7 +285,7 @@ export default {
     async donerReduceDonationAmount() {
       await reduceDonation(this.campaignID, this.reduceAmount);
     },
-    async withdrawFromFailedCampaign(){
+    async withdrawFromFailedCampaign() {
       await refundFailedCampaign(this.campaignID);
     }
   },
@@ -237,5 +311,12 @@ li {
 }
 a {
   color: #42b983;
+}
+
+.campaignText {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 5px;
+  text-align: center;
 }
 </style>
