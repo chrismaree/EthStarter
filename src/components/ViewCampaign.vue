@@ -22,12 +22,17 @@
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
 <br>
 <div v-if="isFunder">
-  </div>
     <p><strong>You have contributed to this probject!</strong> If the campaign has not ended you can reduce your donation. <br> Please not that you can only with reduce your donation if it wont make a passing campaign fail.</p>
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="reduceAmount" :precision="2" :step="0.1"></el-input-number> Ether  
-    <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="reduceDonationAmount" type="primary">Reduce Donation</el-button>
-    <hr>
+    <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="donerReduceDonationAmount" type="primary">Reduce Donation</el-button>
   </div>
+
+<div v-if="isManager">
+    <p><strong>You manage to this probject!</strong> If the campaign has ended and was successful, you can withdraw all the donation funds.</p>
+    <el-button :disabled="CampaignStatus!='Ended'" @click="managerWithdrawFromCampaign" type="primary">Withdraw from campaign</el-button>
+  </div>
+  <hr>
+</div>
 </template>
 
 <script>
@@ -73,7 +78,8 @@ export default {
       CampaignStatusTime: "",
       fundingAmount: 0,
       isFunder: false,
-      reduceAmount:0
+      isManager: false,
+      reduceAmount: 0
     };
   },
   methods: {
@@ -91,6 +97,7 @@ export default {
         1000
       );
       await this.identifyIfContributer();
+      await this.identifyIfManager();
     },
 
     convertSeconds(seconds) {
@@ -175,10 +182,20 @@ export default {
         this.isFunder = true;
       }
     },
-    async withdrawFromCampaign() {},
-    async reduceDonationAmount() {
-      await reduceDonation(this.campaignID, this.reduceAmount)
+    async identifyIfManager() {
+      if (
+        this.contractReturnedData[0] ==
+        this.$store.state.defaultEthWallet.toLowerCase()
+      ) {
+        this.isManager = true;
+      }
     },
+    async managerWithdrawFromCampaign() {
+      await withdrawCampaignFunds(this.campaignID);
+    },
+    async donerReduceDonationAmount() {
+      await reduceDonation(this.campaignID, this.reduceAmount);
+    }
   },
   async mounted() {
     await loadCampaignManager();
