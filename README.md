@@ -32,6 +32,11 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 ### How
 There are three main parts to the EthStater platform: Ethereum Smart contract, IPFS storage and the frontend. Each will be discussed intern to justify design decision and to provide a high level overview of the solution.
 
+### System Maintainability
+
+### Security Tools / Common Attacks
+
+### Design Decision
 
 ### System Limitations
 EthStarter was build using one main smart contract to store all campaign information. Design was kept intentionally simple to demonstrate the basic principles of the system. Future iterations would involve more complex designs such as a community driven campaign curation process and some form of verification for quality of projects added to the system.
