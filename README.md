@@ -11,7 +11,7 @@ Current web2.0 funding platforms like Kickstater, Indigogo and others all suffer
 2. **Accessability**: Many projects are restricted to particular geographic regions. If you fall outside of these regions, you can't contribute to the projects. Clearly, if the project intends to sell products that require shipping, this needs to be taken into account but there is no reason that someone should not be able to contribute to charity or open source projects from anywhere in the world.
 
 ###User Stories
-The workflow and user interaction for Etherstarter is very simple. There are two broad categories of users: Campaign managers and campaign donors. Each users story will be shown with some accompanying campaigns for a hungry cat.
+The workflow and user interaction for EthStarter is very simple. There are two broad categories of users: Campaign managers and campaign donors. Each users story will be shown with some accompanying campaigns for a hungry cat.
 
 ####Campaign manager:
 
@@ -25,6 +25,9 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 
 ####Campaign Donor:
 
+1. Donors to the platform can view all currently listed campaigns. They can then contribute to any project they see fit by clicking the "Fund Campaign" button.
+2. The donor can choose to reduce their donation, if they wish, after the donation period. This can *only* be done if the reduction does not result in a successful campaign becoming unsuccessful.
+3. In the event of an unsuccessful campaign, the donor is able to withdraw their funds.
 
 ###How
 
