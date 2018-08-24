@@ -23,13 +23,14 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 ![](img/newCampaignNotFunded.png?raw=true)
 1. As the manager, you are given extra controls, such as the ability to withdraw the funds from the campaign. This functionality is restricted until after the end of the campaign period. Additionally, withdraw is only enabled if the campaign was successful.
 
-#### Campaign Donor:
+#### Campaign Donor
 
 1. Donors to the platform can view all currently listed campaigns. They can then contribute to any project they see fit by clicking the "Fund Campaign" button.
 2. The donor can choose to reduce their donation, if they wish, after the donation period. This can *only* be done if the reduction does not result in a successful campaign becoming unsuccessful.
 3. In the event of an unsuccessful campaign, the donor is able to withdraw their funds.
 
 ### How
+There are three main parts to the EthStater platform: Ethereum Smart contract, IPFS storage and the frontend. Each will be discussed intern to justify design decision and to provide a high level overview of the solution.
 
 
 ### System Limitations
