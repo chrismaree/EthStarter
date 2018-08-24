@@ -55,7 +55,7 @@ const reduceDonation = async (_campaignID, _value) => {
 }
 
 const refundFailedCampaign = async (_campaignID) => {
-    await contractInstance.reduceDonation(_campaignID, {
+    await contractInstance.refundFailedCampaign(_campaignID, {
         from: store.state.defaultEthWallet,
         gasPrice: 2000000000,
         gas: '2000000',

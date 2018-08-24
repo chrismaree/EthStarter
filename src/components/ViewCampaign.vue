@@ -21,16 +21,25 @@
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
 <br>
-<div v-if="isFunder">
+<div v-if="isFunder && !failedCampaign">
     <p><strong>You have contributed to this probject!</strong> If the campaign has not ended you can reduce your donation. <br> Please not that you can only with reduce your donation if it wont make a passing campaign fail.</p>
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="reduceAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="donerReduceDonationAmount" type="primary">Reduce Donation</el-button>
   </div>
 
-<div v-if="isManager">
+    <div v-if="isFunder && failedCampaign">
+    <p><strong>You have contributed to this probject!</strong>. However, the campaign has ended and it failed!<br> You can withdraw your donation </p>
+    <el-button @click="withdrawFromFailedCampaign" type="primary">Withdraw Donation</el-button>
+    </div>
+
+<div v-if="isManager && !failedCampaign">
     <p><strong>You manage to this probject!</strong> If the campaign has ended and was successful, you can withdraw all the donation funds.</p>
     <el-button :disabled="CampaignStatus!='Ended'" @click="managerWithdrawFromCampaign" type="primary">Withdraw from campaign</el-button>
   </div>
+
+  <div v-if="isManager && failedCampaign">
+    <p><strong>You manage to this probject!</strong>. However, the campaign has ended and it failed! </p>
+    </div>
   <hr>
 </div>
 </template>
@@ -79,7 +88,8 @@ export default {
       fundingAmount: 0,
       isFunder: false,
       isManager: false,
-      reduceAmount: 0
+      reduceAmount: 0,
+      failedCampaign: false
     };
   },
   methods: {
@@ -190,11 +200,19 @@ export default {
         this.isManager = true;
       }
     },
+    async identifyIfFailedCampaign(){
+      if(this.CampaignStatus=="Ended" && this.contractReturnedData[3]<this.contractReturnedData[4]){
+        this.failedCampaign = true
+      }
+    },
     async managerWithdrawFromCampaign() {
       await withdrawCampaignFunds(this.campaignID);
     },
     async donerReduceDonationAmount() {
       await reduceDonation(this.campaignID, this.reduceAmount);
+    },
+    async withdrawFromFailedCampaign(){
+      await refundFailedCampaign(this.campaignID);
     }
   },
   async mounted() {
