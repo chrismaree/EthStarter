@@ -4,8 +4,6 @@
       <h1>Name: {{ipfsReturnedData.name}}</h1>
         <img class="preview" :src="ipfsReturnedData.imageData"><br>
         campaignID: {{ campaignID }}<br>
-        Status: {{CampaignStatus}}<br>
-        Time: {{CampaignStatusTime}}<br>
         Country: {{ipfsReturnedData.country}}<br>
         Description: {{ipfsReturnedData.shortDescription}}<br>
         Date: {{ipfsReturnedData.date}}<br>
@@ -16,11 +14,18 @@
         Funders: {{contractReturnedData[7]}}<br>
     <div v-html="ipfsReturnedData.longDescription"></div>
     <br>
+    <br>
+    Status: {{CampaignStatus}}<br>
+        Time: {{CampaignStatusTime}}<br>
     
-    <el-button @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
-    <el-input-number v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Eter
-
-    
+    <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Ether  
+    <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
+<br>
+<div v-if="isFunder">
+  </div>
+    <p><strong>You have contributed to this probject!</strong> If the campaign has not ended you can reduce your donation. <br> Please not that you can only with reduce your donation if it wont make a passing campaign fail.</p>
+    <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="reduceAmount" :precision="2" :step="0.1"></el-input-number> Ether  
+    <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="reduceDonationAmount" type="primary">Reduce Donation</el-button>
     <hr>
   </div>
 </template>
@@ -32,7 +37,10 @@ import {
   loadCampaignManager,
   getNumberOfCampaigns,
   fetchCampaign,
-  fundCampaign
+  fundCampaign,
+  reduceDonation,
+  refundFailedCampaign,
+  withdrawCampaignFunds
 } from "../../utils/CampaignManagerInterface";
 
 export default {
@@ -63,7 +71,9 @@ export default {
       //identify things like if: a fund is finished but unclaimed, it will still say Running on chain
       //Data is stored as: d, h, m, s;
       CampaignStatusTime: "",
-      fundingAmount: 0
+      fundingAmount: 0,
+      isFunder: false,
+      reduceAmount:0
     };
   },
   methods: {
@@ -80,6 +90,7 @@ export default {
         }.bind(this),
         1000
       );
+      await this.identifyIfContributer();
     },
 
     convertSeconds(seconds) {
@@ -94,53 +105,80 @@ export default {
       return { d: d, h: h, m: m, s: s };
     },
 
-    identifyCampaignStatus(contractData) {
+    identifyCampaignStatus() {
       let currentTime = new Date() / 1000;
       //Has not started. current time less than the start time
-      if (currentTime < contractData[1]) {
+      if (currentTime < this.contractReturnedData[1]) {
         this.CampaignStatus = "Not Started";
-        let timeBetween = this.convertSeconds(contractData[1] - currentTime);
+        let timeBetween = this.convertSeconds(
+          this.contractReturnedData[1] - currentTime
+        );
         this.CampaignStatusTime =
           "Campaign Starts in " +
           timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
-          " hours and " +
+          " hours, " +
+          timeBetween["m"] +
+          " minutes and " +
           timeBetween["s"] +
           " seconds";
       }
       //Is running. The current time is more than the start time, but less then the end time
-      if (currentTime > contractData[1] && currentTime < contractData[2]) {
+      if (
+        currentTime > this.contractReturnedData[1] &&
+        currentTime < this.contractReturnedData[2]
+      ) {
         this.CampaignStatus = "Running";
-        let timeBetween = this.convertSeconds(contractData[2] - currentTime);
+        let timeBetween = this.convertSeconds(
+          this.contractReturnedData[2] - currentTime
+        );
         this.CampaignStatusTime =
           "Campaign ends in " +
           timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
-          " hours and " +
+          " hours, " +
+          timeBetween["m"] +
+          " minutes and " +
           timeBetween["s"] +
           " seconds";
       }
       //Is Over. The current time is more than the end time
-      if (currentTime > contractData[2]) {
+      if (currentTime > this.contractReturnedData[2]) {
         this.CampaignStatus = "Ended";
-        let timeBetween = convertSeconds(contractData[2] - currentTime);
+        let timeBetween = convertSeconds(
+          this.contractReturnedData[2] - currentTime
+        );
         this.CampaignStatusTime =
           "Campaign ended " +
           +timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
-          " hours and " +
+          " hours, " +
+          timeBetween["m"] +
+          " minutes and " +
           timeBetween["s"] +
-          " seconds" +
-          "ago";
+          " seconds ago";
       }
     },
-    async fundCurrentCampaign(){
-      console.log(this.fundingAmount)
-      await fundCampaign(this.campaignID, this.fundingAmount)
-    }
+    async fundCurrentCampaign() {
+      console.log(this.fundingAmount);
+      await fundCampaign(this.campaignID, this.fundingAmount);
+    },
+    async identifyIfContributer() {
+      if (
+        this.contractReturnedData[7].indexOf(
+          this.$store.state.defaultEthWallet.toLowerCase()
+        ) > -1
+      ) {
+        this.isFunder = true;
+      }
+    },
+    async withdrawFromCampaign() {},
+    async reduceDonationAmount() {
+      await reduceDonation(this.campaignID, this.reduceAmount)
+    },
   },
   async mounted() {
     await loadCampaignManager();

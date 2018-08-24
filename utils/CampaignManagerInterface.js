@@ -23,8 +23,8 @@ const loadCampaignManager = async (c) => {
 const createNewCampaign = async (_startingTime, _endingTime, _goal, _cap, _ipfsHash) => {
     return await contractInstance.createCampaign(_startingTime,
         _endingTime,
-        _goal,
-        _cap,
+        _goal * 1000000000000000000,
+        _cap * 1000000000000000000,
         _ipfsHash, {
             from: store.state.defaultEthWallet,
             gasPrice: 2000000000,
@@ -47,7 +47,7 @@ const fundCampaign = async (_campaignID, _value) => {
 }
 
 const reduceDonation = async (_campaignID, _value) => {
-    await contractInstance.reduceDonation(_campaignID, _value, {
+    await contractInstance.reduceDontation(_campaignID, _value * 1000000000000000000, {
         from: store.state.defaultEthWallet,
         gasPrice: 2000000000,
         gas: '2000000',

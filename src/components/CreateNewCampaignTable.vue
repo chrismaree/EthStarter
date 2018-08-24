@@ -78,13 +78,6 @@
 
 {{ipfsCreatedAddress}}
 
-<p>Load Hash</p>
-        <input v-model="loadAddress" name="loadAddress" class="input" type="text">
-        <br>
-        <el-button @click="loadHash" class="button is-primary is-fullwidth subtitle">Load Hash</el-button>
-        <br>
-        {{retreivedText}}
-
 </div>
 </template>
 <script>
