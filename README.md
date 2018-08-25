@@ -1,5 +1,5 @@
 # EthStarter
-**Decentralized, peer to peer funding platform for creatives, charities and open source projects**
+**Decentralized, peer to peer funding platform for creatives, charities and open source projects.**
 
 ### Overview
 Ethstarter enables individuals to create new campaigns and publish them on an open platform. Key logic regarding campaign operation is stored within Ethereum Smart contracts and additional information (such as images, text and embedded content) is stored on IPFS. Any other user can then fund the campaign during the funding period. Ether is locked in the contract until the end of the funding period at which point the campaign manger can withdraw from the campaign, if the campaign was successful. If the campaign does not receive enough donations during the funding period, the donors can withdraw their contributions after the end of the campaign. The whole process occures without the need for a central authority to oversee any aspect of the exchange; The campaigns can be seen as a peer-to-peer exchange between the fund manager and the donors enabling a novel, trustless mechanism for funding projects!
@@ -35,6 +35,16 @@ There are three main parts to the EthStater platform: Ethereum Smart contract, I
 ### System Maintainability
 
 ### Security Tools / Common Attacks
+EthStarter has been designed to sufficiently prevent common attack vectors. The simplicity in design means that most normal attack vectors do not apply, such as Race condition, Transaction-Ordering Dependence (TOD) and Front Running. There are, however, three sections of the system design that could result in potential attack vectors. Each of these possible vulnerabilities is discussed as well as how EthStarter mitigates against them.
+
+1. Timestamp Dependence
+2. Integer Overflow and Underflow
+3. Forcibly Sending Ether to a Contract
+
+
+The EthStarter contract is invulnerable to Reentrancy attacks due to correct ordering of operations in withdraw type statements and the use of transfer() to prevent any external code from being executed.
+
+
 
 ### Design Decision
 

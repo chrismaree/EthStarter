@@ -15,7 +15,7 @@ if (typeof web3 !== 'undefined') {
 let contractInstance
 
 const loadCampaignManager = async (c) => {
-    contractInstance = await Contract.at("0xc2d4a7b3024479a6b2b50864c04cbb5f52cb8700")
+    contractInstance = await Contract.at("0x0118e65e69eb20714afec0a17c1065785316135e")
     console.log("Contract Loaded")
 }
 

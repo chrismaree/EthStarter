@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 // EPM Library Usage
 import "./Ownable.sol";
+import "./Proxy.sol";
 
 
 /** @title A managment contract to store and manage all Campains for the platform.
@@ -11,7 +12,7 @@ import "./Ownable.sol";
 * not result in the campaign no longer getting funded.
 * @author Chris Maree - SoIdarity 
 */
-contract CampaignManager is Ownable{
+contract CampaignManager is Ownable, Proxy{
     /** @dev store the current state of the Camaign. 
     */
     enum State{NotStarted, Running, Funded, UnderFunded}

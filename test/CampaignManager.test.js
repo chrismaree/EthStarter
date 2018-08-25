@@ -1,5 +1,5 @@
 // All contract functionality is fully testing in the tests below. The testing structure
-// is to address each majour usecase of the contract, in accordance with the contract
+// is to address each major usecase of the contract, in accordance with the contract
 // interface. The time of the blockchain is modified using the advanceToBlock, increseTime
 // and latestTime javascript helpers to simulate particular points in time.
 
