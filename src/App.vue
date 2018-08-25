@@ -1,26 +1,20 @@
 <template>
   <div class="app">
     
-<el-container>
+
   <el-header class="nav">
     <router-link to="/">Home</router-link> |
       <router-link to="/EthereumContracts">Ethereum Contracts </router-link> |
       <router-link to="/IPFSExamples">IPFS Examples</router-link> |
       <router-link to="/CreateNewCampaign">Create New Campaign</router-link> |
       <router-link to="/ViewCampaigns">View Campaigns</router-link>
+       <br>
+       <hr class="navBarLine">
   </el-header>
   <el-main>
     <router-view/>
   </el-main>
-</el-container>
 
-      
-    
-    
-
-
-
-    
   </div>
 </template>
 
@@ -41,5 +35,10 @@
       color: #42b983;
     }
   }
+}
+.navBarLine {
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>

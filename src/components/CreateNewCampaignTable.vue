@@ -1,8 +1,9 @@
 <template>
+<el-card class="contentCard">
 <div class="CreateNewCampaignTable">
 <el-form ref="form" :model="form" label-width="150px">
-<el-row>
-  <el-col :span="9" :offset="6">
+<el-row :gutter="20">
+  <el-col :span="16">
     <el-form-item label="Campaign name">
     <el-input v-model="form.name"></el-input>
   </el-form-item>
@@ -25,7 +26,7 @@
   </el-form-item>
   
   </el-col>
-  <el-col :span="5">
+  <el-col :span="6">
     
     
                 Campaign Image
@@ -38,7 +39,7 @@
 </el-row>
 
   <el-row>
-    <el-col :span="15" :offset="6">
+    <el-col :span="24">
 
 <el-form-item label="Campaign Type">
     <el-checkbox-group v-model="form.type">
@@ -79,6 +80,7 @@
 {{ipfsCreatedAddress}}
 
 </div>
+</el-card>
 </template>
 <script>
 import { uploadFile, viewFile } from "../../utils/IPFSUploader";
@@ -148,7 +150,7 @@ export default {
 
 <style>
 img.preview {
-  width: 300px;
+  width: 250px;
   background-color: white;
   border: 1px solid #ddd;
   padding: 5px;

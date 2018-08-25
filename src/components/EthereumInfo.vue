@@ -1,16 +1,10 @@
 <template>
-  <div class="hello">
-      Wallet Address: {{this.$store.state.defaultEthWallet}}
+  <div class="EthereumInfo">
+      Address: {{this.$store.state.defaultEthWallet}}
       <br>
-      Network Name: {{this.$store.state.netIdString}} 
+      Network: {{this.$store.state.netIdString}} 
       <br>
-      Wallet Balance: {{this.$store.state.walletBalance}} 
-    <h1>Campain Manager</h1>
-    Starting Value
-    
-    <br>    
-    <el-button type="submit" @click="loadContract" class="button is-primary is-fullwidth subtitle">Load Contract</el-button>
-    <br>
+      Balance: {{this.$store.state.walletBalance/1000000000000000000}} Ether 
   </div>
 </template>
 
@@ -18,7 +12,7 @@
 import {loadCampaignManager} from "../../utils/CampaignManagerInterface";
 
 export default {
-  name: "CampainManager",
+  name: "EthereumInfo",
   data() {
     return {
       loadAddress:0,
@@ -53,5 +47,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.EthereumInfo{
+  text-align: left;
 }
 </style>

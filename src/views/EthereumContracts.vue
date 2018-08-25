@@ -1,17 +1,17 @@
 <template>
   <div class="EthereumContracts">
-    <CampaignManager/>
+    <EthereumInfo/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import CampaignManager from '@/components/CampaignManager.vue'
+import EthereumInfo from '@/components/EthereumInfo.vue'
 
 export default {
   name: 'EthereumContracts',
   components: {
-    CampaignManager
+    EthereumInfo
   }
 }
 </script>
