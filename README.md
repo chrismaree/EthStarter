@@ -20,8 +20,8 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 <p align="center">  
   <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/DatePicker.png?raw=true" alt="Date Picker"/>
   <i>Date Picker</i>. Select the start and end date/time for the campaign.
-  <br>
-
+</p>
+<p>
   <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/CreateCampaignCats.png?raw=true" alt="Date Picker"/>
   <i>Create New Campaign</i>
   
