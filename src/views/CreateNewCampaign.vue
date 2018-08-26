@@ -19,7 +19,7 @@ export default {
 
 <style>
 .contentCard {
-  max-width: 900px;
+  max-width: 1100px;
   /* text-align: center; */
 }
 </style>

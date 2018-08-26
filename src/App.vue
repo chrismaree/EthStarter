@@ -18,6 +18,17 @@
   </div>
 </template>
 
+<script>
+import EthereumInfo from '@/components/EthereumInfo.vue'
+
+export default {
+  components: {
+    EthereumInfo
+  }
+}
+</script>
+
+
 <style lang="scss">
 .app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;

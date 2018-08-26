@@ -27,11 +27,10 @@
   
   </el-col>
   <el-col :span="6">
-    
-    
                 Campaign Image
                 <input type="file" @change="previewImage" accept="image/*">
-            
+            <br>
+            <br>
             <div class="image-preview" v-if="form.imageData.length > 0">
                 <img class="preview" :src="form.imageData">
             </div>
@@ -52,6 +51,11 @@
   </el-form-item>
   <el-form-item label="Goal and Cap">
      <div class="block">
+    <el-row>
+      
+      <h2 style="margin-top:0px">  {{form.goalCap[0]}} <i class="el-icon-arrow-right"></i> {{form.goalCap[1]}} Ethers</h2>
+      
+    </el-row>
     <el-slider
       v-model="form.goalCap"
       range
@@ -69,11 +73,9 @@
     </el-col>
   </el-row>
 
-  
 <br>
   <el-form-item>
     <el-button type="primary" @click="onSubmit">Create</el-button>
-    
   </el-form-item>
 </el-form>  
 
@@ -94,7 +96,7 @@ export default {
   data() {
     return {
       tinyOptions: {
-        height: 500
+        height: 300
       },
       form: {
         imageData: "",

@@ -1,16 +1,42 @@
 <template>
   <div class="ViewCampaign">
+    <el-row>
+      <el-col :span="8">
     
+    <strong>Status:</strong> {{CampaignStatus}}
+    
+      </el-col>
+      <el-col :span="8">
+        <h1 style="margin-top:0">{{ipfsReturnedData.name}}</h1>
+      </el-col>
+      <el-col :span="8">
+        <br>
+            {{CampaignStatusTime}}<br>
+      </el-col>
+    </el-row>
+    {{ipfsReturnedData.shortDescription}}
+    <br>
+<br>
+<el-progress :text-inside="true" :stroke-width="18" :percentage="timePercentage"></el-progress>
+<br>
 <el-row>
-  <el-col :span="12">
-    <h1>{{ipfsReturnedData.name}}</h1>
-        {{ipfsReturnedData.shortDescription}}
-        <br>
-        <br>
-        <br>
+  <el-col :span="8">
         <img class="preview" :src="ipfsReturnedData.imageData">
+        <br>
+        <br>
+        <el-col :span="12">
+          <el-progress type="circle" :percentage="goalPercentage"></el-progress>
+          <br>
+          goal
+        </el-col>
+    <el-col :span="12">
+      <el-progress type="circle" :percentage="capPercentage"></el-progress>
+      <br>
+      cap
+    </el-col>
+
   </el-col>
-  <el-col :span="12">
+  <el-col :span="16">
           <el-table
           border
           stripe
@@ -32,10 +58,9 @@
 
       <br>
     <div class="campaignText" v-html="ipfsReturnedData.longDescription"></div>
-    <br>
-    <strong>Status:</strong> {{CampaignStatus}} | 
-        {{CampaignStatusTime}}<br>
+    
     <h2>Fund Campaign</h2>
+  
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
 <br>
@@ -108,7 +133,10 @@ export default {
       isManager: false,
       reduceAmount: 0,
       failedCampaign: false,
-      tableData: []
+      tableData: [],
+      timePercentage: 0,
+      goalPercentage: 0,
+      capPercentage: 0
     };
   },
   methods: {
@@ -127,10 +155,10 @@ export default {
       );
       await this.identifyIfContributer();
       await this.identifyIfManager();
-      this.generateTable()
+      this.generateTable();
     },
 
-    generateTable(){
+    generateTable() {
       let type = "";
       for (let i = 0; i < this.ipfsReturnedData.type.length; i++) {
         type += this.ipfsReturnedData.type[i] + ", ";
@@ -143,7 +171,7 @@ export default {
       }
 
       let funders = this.contractReturnedData[7];
-      let fundersString='';
+      let fundersString = "";
       if (funders == [] || funders == "") {
         fundersString = "None yet...";
       } else {
@@ -153,10 +181,10 @@ export default {
         for (let i = 0; i < funders.length; i++) {
           fundersString += funders[i] + ", ";
         }
-      
+
         fundersString = fundersString.substring(0, fundersString.length - 2);
       }
-      
+
       this.date =
         this.ipfsReturnedData.date[0]
           .substring(0, this.ipfsReturnedData.date[0].length - 5)
@@ -180,6 +208,10 @@ export default {
         { propery: "Campaign Balance", value: balance },
         { propery: "Funders", value: fundersString }
       ];
+      this.goalPercentage = parseInt(
+        balance / this.ipfsReturnedData.goalCap[0] * 100 / 1000000000000000000);
+      this.capPercentage = parseInt(
+        balance / this.ipfsReturnedData.goalCap[1] * 100 / 1000000000000000000);
     },
     convertSeconds(seconds) {
       var d, h, m, s;
@@ -235,8 +267,8 @@ export default {
       //Is Over. The current time is more than the end time
       if (currentTime > this.contractReturnedData[2]) {
         this.CampaignStatus = "Ended";
-        let timeBetween = convertSeconds(
-          this.contractReturnedData[2] - currentTime
+        let timeBetween = this.convertSeconds(
+          currentTime - this.contractReturnedData[2]
         );
         this.CampaignStatusTime =
           "Campaign ended " +
@@ -249,9 +281,27 @@ export default {
           timeBetween["s"] +
           " seconds ago";
       }
+      //((currentTime - startTime)/(finalTime - InitalTime))*100
+
+      if (
+        currentTime > this.contractReturnedData[1] &&
+        currentTime < this.contractReturnedData[2]["c"][0]
+      ) {
+        this.timePercentage = parseInt(
+          (parseInt(currentTime) - this.contractReturnedData[1]["c"][0]) /
+            (this.contractReturnedData[2]["c"][0] -
+              this.contractReturnedData[1]["c"][0]) *
+            100
+        );
+      }
+      if (currentTime < this.contractReturnedData[1]) {
+        this.timePercentage = 0;
+      }
+      if (currentTime > this.contractReturnedData[2]) {
+        this.timePercentage = 100;
+      }
     },
     async fundCurrentCampaign() {
-      console.log(this.fundingAmount);
       await fundCampaign(this.campaignID, this.fundingAmount);
     },
     async identifyIfContributer() {

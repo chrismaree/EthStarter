@@ -1,8 +1,10 @@
 <template>
     <div class="ViewCampaign">
-       numberOfCampaigns {{numberOfCampaigns}}
   <div v-for="index in numberOfCampaigns" :key="index">
+<el-card class="contentCard">
 <ViewCampaign :campaignID="index-1" />
+</el-card>
+<br>
         </div>
     </div>
 </template>
@@ -52,5 +54,10 @@ li {
 }
 a {
   color: #42b983;
+}
+
+.contentCard {
+  max-width: 1200px;
+  /* text-align: center; */
 }
 </style>

@@ -1,7 +1,8 @@
 <template>
     <div class="ViewCampaigns">
-        <br>
-        <ViewAllCampaigns/>
+        <h1>View all campaigns</h1>
+        <h4>Projects Listed here are in chronological order of creation</h4>
+        <ViewAllCampaigns class="center"/>
     </div>
 </template>
 
@@ -18,3 +19,5 @@
         }
     }
 </script>
+
+
