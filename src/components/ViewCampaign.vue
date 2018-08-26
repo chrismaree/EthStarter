@@ -83,7 +83,6 @@
   <div v-if="isManager && failedCampaign">
     <p><strong>You manage to this project!</strong>. However, the campaign has ended and it failed! </p>
     </div>
-  <hr>
 </div>
 </template>
 

@@ -18,11 +18,14 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 
 1. The user accesses the system through a web3 enabled browser (metamask, Status, Cipher etc.) to create a new campaign. The user fills in all relevant information. They are able to speify: the name of the campaign, where it is occuring, a description, the duration of the funding period, the type of campaign, the goal and cap of the campaign. The user is also able to upload an image, used to represent the project as a whole. The user then have the ability to write as much text as they wish to describe the project. This section enables fully customisable typography, from bold/italic/underline to imbedited images, Youtube videos and any other HTML representable content (basically, you can put anything in here.)
 <p align="center">  
-  <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/DatePicker.png?raw=true" alt="Date Picker"/>
+  <img
+   src="https://github.com/SoIidarity/EthStarter/blob/master/img/DatePicker.png?raw=true" alt="Date Picker"/>
+  <br>
   <i>Date Picker</i>. Select the start and end date/time for the campaign.
 </p>
 <p>
   <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/CreateCampaignCats.png?raw=true" alt="Date Picker"/>
+  <br>
   <i>Create New Campaign</i>
   
 </p>
@@ -33,7 +36,7 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 
 #### Campaign Donor
 
-1. Donors to the platform can view all currently listed campaigns.
+1. Donors to the platform can view all currently listed campaigns. Below is a screenshot of a silly example of a sample project.
 <p align="center">
   <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/buffHourse.png?raw=true" alt="Date Picker"/>
   <i>Non-Funded Campaign</i>. Note the embeded youtube video and that the status is "Not Started"
@@ -64,13 +67,17 @@ On the retrieval of Campaigns, the Vue frontend requests the number of campaigns
 Apon interacting with a deployed campaign, the frontend calls contract functions directly. Input sanitization is done on both the front end and within the contracts.
 
 ### System Maintainability and Design Decision
-The system has been designed to be as maintainable as possible, employing separation of concerns in every aspect of the design. The smart contracts employ a proxy contract that forwards all contract calls to a defined contract Address through the use of delegate calls, thus creating upgradeable stateful contracts. Only the owner can change the address that the contracts point to. Future iterations Would involve the usage of dedicated separate storage for campaign information, further separating logic and storage. The diagrams below outline this design paradigm.
+The system has been designed to be as maintainable as possible, employing separation of concerns in every aspect of the design. The smart contracts employ a proxy contract that forwards all contract calls to a defined contract Address. This is implemented through the use of delegate calls, thus creating upgradeable stateful contracts. Only the owner can change the address that the contracts point to. Future iterations Would involve the usage of dedicated separate storage for campaign information, further separating logic and storage. The diagrams below outline this design paradigm.
 
 <p align="center">
   <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/SystemDiagram.png?raw=true" alt="Date Picker"/>
   <i>System Design Diagram</i>. The current version implements upgradability through a delegate call proxy contract. Future versions would incorporate separation of Data storage from the main logic.
   <br>
 </p>
+
+The front end also has separation of concerns between layers. Utility scripts, such as `CampaignManagerInterface.js` and `web3Service.js` remove the front end from needing to know how to interact with the smart contracts. The front end calls assessors/mutator from exported functions from these utilities.
+
+The front end has hased a component design paradigm meaning that each key UI element is a component that is used within other elements enabling modular upgrade and styling of each UI component. Additionally, this makes the process of adding more functionality easier as the project grows and scales.
 
 ### Security Tools / Common Attacks
 EthStarter has been designed to sufficiently prevent common attack vectors. The simplicity in design means that most normal attack vectors do not apply, such as Race condition, Transaction-Ordering Dependence (TOD) and Front Running. There are, however, three sections of the system design that could result in potential attack vectors. Each of these possible vulnerabilities is discussed as well as how EthStarter mitigates against them.
@@ -84,8 +91,8 @@ It is conceivable that someone could forcibly send ether the the campaign. This 
 4. **Reentrancy attacks**
 The EthStarter contract is invulnerable to Reentrancy attacks due to correct ordering of operations in withdraw type statements and the use of transfer() to prevent any external code from being executed.
 
+### Smart Contract Testing
+Extensive unit tests have been written for the key logic of the system. Code coverage has also been calculated and the results can be seen below.
 
 ### System Limitations
-EthStarter was build using one main smart contract to store all campaign information. Design was kept intentionally simple to demonstrate the basic principles of the system. Future iterations would involve more complex designs such as a community driven campaign curation process and some form of verification for quality of projects added to the system.
-
-###
+EthStarter was build using one main smart contract to store all campaign information. Design was kept intentionally simple to demonstrate the basic principles of the system. Future iterations would involve more complex designs such as a community driven campaign curation process and some form of verification for quality of projects added to the system. Additionally, the separation of logic and storage layers.
