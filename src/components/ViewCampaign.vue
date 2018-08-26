@@ -165,9 +165,9 @@ export default {
       }
       type = type.substring(0, type.length - 2);
 
-      let balance = this.contractReturnedData[3];
+      let balance = this.contractReturnedData[3]["c"][0]/10000+" Ether";
       if (balance == undefined || balance == 0) {
-        balance = "0";
+        balance = "0 Ether";
       }
 
       let funders = this.contractReturnedData[7];
@@ -209,9 +209,9 @@ export default {
         { propery: "Funders", value: fundersString }
       ];
       this.goalPercentage = parseInt(
-        balance / this.ipfsReturnedData.goalCap[0] * 100 / 1000000000000000000);
+        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.goalCap[0] * 100 / 1000000000000000000);
       this.capPercentage = parseInt(
-        balance / this.ipfsReturnedData.goalCap[1] * 100 / 1000000000000000000);
+        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.goalCap[1] * 100 / 1000000000000000000);
     },
     convertSeconds(seconds) {
       var d, h, m, s;
