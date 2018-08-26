@@ -53,21 +53,37 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 ### How
 There are three main parts to the EthStater platform: Ethereum Smart contract, IPFS storage and the frontend. Each will be discussed intern to justify design decision and to provide a high level overview of the solution.
 
-### System Maintainability
+Starting at the user front end, the user accesses the website via a web3 enabled browser. The content within the new campaign is uploaded to IPFS using JSON formatting. Images are encoded to bitstreams. Custom HTML input is facilitated by TinyMCE. Rich media within the TinyMCE window is encoded to a byte stream as well. 
+
+The new campaign JSON Blob is then uploaded to IPFS using js-ipfs with the use of the Infura Access point. The hash of this is then taken and fed into the createCampaign function (within the CampaignManager), along with all other key information like the start/end timestamps. Unix timestamps are used for all date storing and manipulation as Solidity uses unix timestamps for now.
+
+All CampaignManager calls are fed via a Proxy contract to enable upgradability. More on this design decision is discussed later.
+
+On the retrieval of Campaigns, the Vue frontend requests the number of campaigns from the smart contract. It then itterates through all campaigns, creating a new Vue component for each. Each component requests information from IPFS and renders this to the front end.
+
+Apon interacting with a deployed campaign, the frontend calls contract functions directly. Input sanitization is done on both the front end and within the contracts.
+
+### System Maintainability and Design Decision
+The system has been designed to be as maintainable as possible, employing separation of concerns in every aspect of the design. The smart contracts employ a proxy contract that forwards all contract calls to a defined contract Address through the use of delegate calls, thus creating upgradeable stateful contracts. Only the owner can change the address that the contracts point to. Future iterations Would involve the usage of dedicated separate storage for campaign information, further separating logic and storage. The diagrams below outline this design paradigm.
+
+<p align="center">
+  <img src="https://github.com/SoIidarity/EthStarter/blob/master/img/SystemDiagram.png?raw=true" alt="Date Picker"/>
+  <i>System Design Diagram</i>. The current version implements upgradability through a delegate call proxy contract. Future versions would incorporate separation of Data storage from the main logic.
+  <br>
+</p>
 
 ### Security Tools / Common Attacks
 EthStarter has been designed to sufficiently prevent common attack vectors. The simplicity in design means that most normal attack vectors do not apply, such as Race condition, Transaction-Ordering Dependence (TOD) and Front Running. There are, however, three sections of the system design that could result in potential attack vectors. Each of these possible vulnerabilities is discussed as well as how EthStarter mitigates against them.
 
-1. Timestamp Dependence
-2. Integer Overflow and Underflow
-3. Forcibly Sending Ether to a Contract
-
-
+1. **Timestamp Dependence**
+EthStarter uses the notion of "now" in its design. This can be manipulated by miners but is not a concern for the safety of the system as there are no potential vulnerabilities arising from a ~30 second variance in the start/end time of the campaign.
+2. **Integer Overflow and Underflow**
+The balances of each campaign is stored using a uint. These *could* potentially overflow/underflow. The case of an overflow is imposible as this value corisponds to ether deposited and there is not enough ether in circulation to cause an overflow. Underflows are prevented by sufficient checks within require statements. The correctness of these requires is verified with unit tests.
+3. **Forcibly Sending Ether to a Contract**
+It is conceivable that someone could forcibly send ether the the campaign. This will, however, achieve nothing past the attacker loosing their ether. There is no core logic based on this total value of the contract but rather each campaign has their own independent wallet uint.
+4. **Reentrancy attacks**
 The EthStarter contract is invulnerable to Reentrancy attacks due to correct ordering of operations in withdraw type statements and the use of transfer() to prevent any external code from being executed.
 
-
-
-### Design Decision
 
 ### System Limitations
 EthStarter was build using one main smart contract to store all campaign information. Design was kept intentionally simple to demonstrate the basic principles of the system. Future iterations would involve more complex designs such as a community driven campaign curation process and some form of verification for quality of projects added to the system.
