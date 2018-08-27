@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "./Ownable.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract Proxy is Ownable {
 

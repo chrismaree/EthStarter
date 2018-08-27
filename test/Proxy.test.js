@@ -1,6 +1,8 @@
 // Proxy logic is tested below. These tests dont need to verify the functionality
 // of the CampaignManager that is verified in the CampaignManager.test.js. 
-// We just need to test the ability to upgrade and forward logic here.
+// We just need to test the ability to upgrade and forward logic here. Creating 5 tests
+// for this contract is a bit silly so only the required functionality is tested to achive 100%
+// Code coverage.
 
 const {
     ether
@@ -48,19 +50,39 @@ contract('ProxyContract', function (accounts) {
             from: account1
         }), EVMRevert);
     })
-    it('Test that contract calls are correctly forward', async () => {
+    it('Contract calls should be correctly forward to implementation contract', async () => {
+
+        // First, we spawn the proxy contract
         let proxy = await ProxyContract.new({
             from: owner
         })
-        campaignManager = await CampaignManager.new({from: account1});
-        proxy.upgradeTo(campaignManager.address, {
+
+        // Then, create a campaign manager
+        campaignManager = await CampaignManager.new({
+            from: account1
+        });
+
+        // Next, we assign the proxy to forward calls to the original campaign Manager created on line 59
+        await proxy.upgradeTo(campaignManager.address, {
             from: owner
         })
 
-        let campaignManagerOwnerAddress = await campaignManager.owner()
-
-        console.log(campaignManagerOwnerAddress)
+        // Next, we will make a campaign on the campaign manager from the proxy interface to check
+        // that all logic is forwarded to the correct contract
+        let proxyCampaignManager = await CampaignManager.at(proxy.address)
         
+        const goal = ether(10)
+        const cap = ether(15)
+        const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
+        const startingTime = (await latestTime()) + duration.weeks(1);
+        const endingTime = startingTime + duration.weeks(1);
+
+        //Create the campaign, from the interface of the proxy
+        await proxyCampaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash)
+        
+        //read back the number of campaigns created to check that the call was forwared correctly
+        let numberOfCampaigns = await proxyCampaignManager.campaignCount()
+        assert.equal(numberOfCampaigns, 1, "Should have deployed exactly 2 campaign")
     })
 
 });

@@ -4,6 +4,27 @@
 ### Overview
 Ethstarter enables individuals to create new campaigns and publish them on an open platform. Key campaign logic is stored within Ethereum Smart contracts and additional information (such as images, text and embedded content) is stored on IPFS. Any other user can then fund the campaign during the funding period. Ether is locked in the contract until the end of the funding period at which point the campaign manger can withdraw from the campaign, if the campaign was successful. If the campaign does not receive enough donations during the funding period, the donors can withdraw their contributions after the end of the campaign. The whole process occurs without the need for a central authority to oversee any aspect of the exchange; the campaigns can be seen as a peer-to-peer exchange between the fund manager and the donors enabling a novel, trustless mechanism for funding projects!
 
+###How to run the project
+The smart contracts have been set up to compile and run with truffle. The front end was created with vuejs and elementsUI. Requirements to run the project are: `Node>=8.11`,`npm` and `truffle`. To begin with, we need to install all required libraries and utilities. From the root of the repo, run:
+
+    npm install.
+
+Contracts have been deployed to the Rinkeby. Addresses can be found in `deployed_addresses.txt` To interact with the contracts on the local machine:
+  
+    truffle compile
+    truffle test
+    truffle migrate
+
+To test code coverage, from the root directory, run:
+    
+    npm run coverage
+
+Lastly, to interact with Dapp, from the root directory, after running `npm install`, run:
+      
+    npm run serve
+
+The Dapp(same as in screenshots below) should open up on your local machine.
+
 ### Why
 Current web2.0 funding platforms like Kickstater, Indigogo and others all suffer from the same underlying problems. Theses problems can be broken down into two main sections:
 
@@ -92,7 +113,7 @@ It is conceivable that someone could forcibly send ether the the campaign. This 
 The EthStarter contract is invulnerable to Reentrancy attacks due to correct ordering of operations in withdraw type statements and the use of transfer() to prevent any external code from being executed.
 
 ### Smart Contract Testing
-Extensive unit tests have been written for the key logic of the system. Code coverage has also been calculated and the results can be seen below.
+Extensive unit tests have been written for the key logic of the system. Code coverage has also been calculated and the results can be seen below. Both Contracts included in the project yield 100% test coverage.
 
 ### System Limitations
 EthStarter was build using one main smart contract to store all campaign information. Design was kept intentionally simple to demonstrate the basic principles of the system. Future iterations would involve more complex designs such as a community driven campaign curation process and some form of verification for quality of projects added to the system. Additionally, the separation of logic and storage layers.
