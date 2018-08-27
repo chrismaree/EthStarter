@@ -74,6 +74,10 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 2. The donor can choose to reduce their donation, if they wish, after the donation period. This can *only* be done if the reduction does not result in a successful campaign becoming unsuccessful.
 3. In the event of an unsuccessful campaign, the donor is able to withdraw their funds.
 
+### Design Patterns and Desicions. 
+Key separation of concerns was employed at all levels. This implementation is detailed [here](https://www.google.com)
+
+
 ### Security Tools / Common Attacks
 EthStarter has been designed to sufficiently prevent common attack vectors. The simplicity in design means that most normal attack vectors do not apply, such as Race condition, Transaction-Ordering Dependence (TOD) and Front Running. There are, however, three sections of the system design that could result in potential attack vectors. Each of these possible vulnerabilities is discussed as well as how EthStarter mitigates against them.
 

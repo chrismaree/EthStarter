@@ -23,6 +23,10 @@ The system has been designed to be as maintainable as possible, employing separa
   <br>
 </p>
 
-The front end also has separation of concerns between layers. Utility scripts, such as `CampaignManagerInterface.js` and `web3Service.js` remove the front end from needing to know how to interact with the smart contracts. The front end calls assessors/mutator from exported functions from these utilities.
+
+###Front end
+The user interface was made using Vuejs to enable separation of concerns between layers. Utility scripts, such as `CampaignManagerInterface.js` and `web3Service.js` remove the front end from needing to know how to interact with the smart contracts. The front end calls assessors/mutator from exported functions from these utilities.
 
 The front end embodies a component design paradigm meaning that each key UI element is a discrete entity that is used within other elements enabling modular upgrade and styling of each UI component. Additionally, this makes the process of adding more functionality easier as the project grows and scales.
+
+ElementUI was used for styling, not that much was done. 
