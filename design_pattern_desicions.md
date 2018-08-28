@@ -1,4 +1,4 @@
-#Design Decisions
+# Design Decisions
 This document aims to give a high level overview of the decisions made in both the design and construction of EthStarter. Future considerations are also discussed.
 
 ## How Ethstarter works
