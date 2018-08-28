@@ -51,6 +51,7 @@ Solium reported 1 error in the `Proxy.sol` due to the use of inline assembly. De
     | CampaignManager.sol    | 100        | 81.82      | 100        | 100        |                  |
     | Proxy.sol              | 100        | 50         | 100        | 100        |                  |
     | **All files**              | 100        | 79.17      | 100        | 100        |                  |
+**Please Note** that the proxy contract only has 2 tests on it. There is no point in adding more tests to this contract as all possible logic and operation has been verified through these tests, as shown by the coverage.
 
 
 4. **Oyente** was also tested but the current version only supports solc up to version `0.4.19` but EthStarter has been implemented using `0.4.21` so no validation could be done easily.

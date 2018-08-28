@@ -5,11 +5,13 @@
 Ethstarter enables individuals to create new campaigns and publish them on an open platform. Key campaign logic is stored within Ethereum Smart contracts and additional information (such as images, text and embedded content) is stored on IPFS. Any other user can then fund the campaign during the funding period. Ether is locked in the contract until the end of the funding period at which point the campaign manger can withdraw from the campaign, if the campaign was successful. If the campaign does not receive enough donations during the funding period, the donors can withdraw their contributions after the end of the campaign. The whole process occurs without the need for a central authority to oversee any aspect of the exchange; the campaigns can be seen as a peer-to-peer exchange between the fund manager and the donors enabling a novel, trustless mechanism for funding projects!
 
 ## How to run the project
-The smart contracts have been set up to compile and run with truffle. The front end was created with vuejs and elementsUI. Requirements to run the project are: `Node>=8.11`,`npm` and `truffle`. To begin with, we need to install all required libraries and utilities. From the root of the repo, run:
+The smart contracts have been set up to compile and run with truffle. The front end was created with `vuejs` and `elementsUI`. The project has been tested on: Windows 10, Arch Linux and Ubuntu 16.04 and run successfully on all platforms without errors. 
 
-    npm install.
+Requirements to run the project are: `Node>=8.11`,`npm` and `truffle`. To begin with, we need to install all required libraries and utilities. From the root of the repo, run:
 
-Contracts have been deployed to the Rinkeby. Addresses can be found in `deployed_addresses.txt` To interact with the contracts on the local machine:
+    npm install
+
+Contracts have been deployed to the Rinkeby. Addresses can be found in `deployed_addresses.txt` To interact with the contracts on the local machine, run a local test blockchain on 8545 and then:
   
     truffle compile
     truffle test

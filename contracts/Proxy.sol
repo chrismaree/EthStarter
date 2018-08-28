@@ -33,5 +33,4 @@ contract Proxy is Ownable {
         default { return(ptr, size) }
         }
     }
-
 }

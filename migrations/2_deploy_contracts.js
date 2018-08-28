@@ -12,7 +12,6 @@ module.exports = function (deployer) {
             let proxyInstance = ProxyContract.at(value.address)
             // set the instance of the campaign manager to the proxy
             proxyInstance.upgradeTo(deployedCampaignManagerAddress)
-            console.log("Proxy contract set to deployed CampaignManager!")
         })
     });
 };

@@ -29,4 +29,7 @@ The user interface was made using Vuejs to enable separation of concerns between
 
 The front end embodies a component design paradigm meaning that each key UI element is a discrete entity that is used within other elements enabling modular upgrade and styling of each UI component. Additionally, this makes the process of adding more functionality easier as the project grows and scales.
 
-ElementUI was used for styling, not that much was done. 
+ElementUI was used for styling, not that much was done.
+
+## Other Design Considerations
+An **Emergency stop** Paradigm was used enabling core functionality to be stopped if the contract is detected to be faulty. There are two different emergency stops implemented in EthStarter: one to stop the ability to fund the campaigns and one to stop the creation of new campaigns. Both stops do not prevent the withdrawal of funds using the normal procedure as to not prevent funds from getting locked up within the contracts.
