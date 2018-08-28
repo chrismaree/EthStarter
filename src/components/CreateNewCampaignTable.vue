@@ -1,5 +1,7 @@
 <template>
-<el-card class="contentCard">
+<el-row>
+  <el-col :span="16" :offset="4">
+    <el-card class="contentCard">
 <div class="CreateNewCampaignTable">
 <el-form ref="form" :model="form" label-width="150px">
 <el-row :gutter="20">
@@ -83,6 +85,9 @@
 
 </div>
 </el-card>
+  </el-col>
+</el-row>
+
 </template>
 <script>
 import { uploadFile, viewFile } from "../../utils/IPFSUploader";

@@ -1,7 +1,9 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h1>Welcome to EthStarter!</h1>
+    <br>
+    <img alt="Vue logo" src="../assets/donate-solid.svg" style="width:250px">
+    <HelloWorld class="center"/>
   </div>
 </template>
 
@@ -16,3 +18,4 @@ export default {
   }
 }
 </script>
+

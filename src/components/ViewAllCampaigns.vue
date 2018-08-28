@@ -1,10 +1,14 @@
 <template>
     <div class="ViewCampaign">
-  <div v-for="index in numberOfCampaigns" :key="index">
-<el-card class="contentCard">
-<ViewCampaign :campaignID="index-1" />
-</el-card>
-<br>
+      <div v-for="index in numberOfCampaigns" :key="index">
+        <el-row>
+          <el-col :span="16" :offset="4">
+            <el-card class="contentCard">
+              <ViewCampaign :campaignID="index-1" />
+            </el-card>
+          </el-col>
+        </el-row>
+        <br>
         </div>
     </div>
 </template>
