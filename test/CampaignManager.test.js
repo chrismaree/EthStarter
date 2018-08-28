@@ -162,16 +162,14 @@ contract('CampaignManager', function (accounts) {
             from: funder1,
             value: validDonation
         })
-
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
-
         //Next, we want to reduce our donation by a set amount and check we get the ether back correctly and that the fund is reduced
 
         let responce = await campaignManager.reduceDontation(campaignID, (validDonation / 2), {
             from: funder1
         })
-
+        
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], (validDonation['c'][0]) / 2, "Balance should be equal to the half the original donation amount")
 
@@ -338,7 +336,7 @@ contract('CampaignManager', function (accounts) {
             from: funder1,
             value: validDonation
         }), EVMRevert);
-        
+
         //Disable creation then create. check throws
         await campaignManager.enableEmergencyStop_Creation({
             from: owner

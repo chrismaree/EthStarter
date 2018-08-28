@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 // EPM Library Usage
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Proxy.sol";
 
 
@@ -53,7 +53,7 @@ contract CampaignManager is Ownable, Proxy{
     bool public emergencyStop_stopFunding = false;
     
     /** @dev store all campaigns as a mapping to their unique ID **/
-    mapping(uint=>Campaign) public campaigns;
+    mapping(uint => Campaign) public campaigns;
     
     /**
     * @dev Verify the times spesified for the campaign are valid
@@ -61,8 +61,8 @@ contract CampaignManager is Ownable, Proxy{
     * @param _endingTime of the campaign (unix time stamp)
     */
     modifier validNewCampaignTime(uint _startingTime,uint _endingTime){
-        require(_startingTime>=now);
-        require(_endingTime>_startingTime);
+        require(_startingTime >= now, "Firstly, Start time must be larger than the current time");
+        require(_endingTime > _startingTime,"Secondly, the end time should be more than the starting time");
         _;
     }
     
@@ -73,8 +73,8 @@ contract CampaignManager is Ownable, Proxy{
     * @param _cap value of the campaign (in ETH)
     */
     modifier validNewCampaignFunding(uint _goal,uint _cap) {
-        if(_cap !=0){
-            require(_cap>_goal);
+        if(_cap != 0){
+            require(_cap > _goal, "Cap should be larger than goal to be valid");
         }
         _;
     }
@@ -84,7 +84,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignHasStarted(uint _campaignID) {
-        require(now>campaigns[_campaignID].startingTime);
+        require(now > campaigns[_campaignID].startingTime, "Current time must be larger than starting time for project to start");
         _;
     }
     
@@ -93,7 +93,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignNotStarted(uint _campaignID){
-        require(now < campaigns[_campaignID].startingTime);
+        require(now < campaigns[_campaignID].startingTime, "Current time should be less than the starting time");
         _;
     }
 
@@ -102,7 +102,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignEnded(uint _campaignID){
-        require(now>campaigns[_campaignID].endingTime);
+        require(now > campaigns[_campaignID].endingTime, "Current time must be bigger than the end time for the campaign to have ended");
         _;
     }
 
@@ -111,7 +111,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignHasNotEnded(uint _campaignID) {
-        require(now<campaigns[_campaignID].endingTime);
+        require(now < campaigns[_campaignID].endingTime, "Current time must be less than the end time for the campaign to have not ended");
         _;
     }
     
@@ -120,7 +120,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignSucceeded(uint _campaignID){
-        require(campaigns[_campaignID].balance>campaigns[_campaignID].goal);
+        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal, "The balance of the campaign must be more than the goal");
         _;
     }
 
@@ -129,8 +129,10 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignUnsuccessful(uint _campaignID) {
-        require(now > campaigns[_campaignID].endingTime);
-        require(campaigns[_campaignID].balance < campaigns[_campaignID].goal);
+        require(now > campaigns[_campaignID].endingTime,"The campaign must have ended firstly to check if a campaign is unsuccessful");
+        require(
+            campaigns[_campaignID].balance < campaigns[_campaignID].goal,
+            "Secondly, the campaign must have a balance less than the goal to be unsuccessful");
         _;
     }
 
@@ -140,7 +142,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignNotFunded(uint _campaignID){
-        require(campaigns[_campaignID].state != State.Funded);
+        require(campaigns[_campaignID].state != State.Funded,"The state of the campaign must be not funded to define an unfunded campaign");
         _;
     }
     
@@ -150,7 +152,9 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignWillNotExceedCap(uint _campaignID) {
-        require(campaigns[_campaignID].balance + msg.value<=campaigns[_campaignID].cap);
+        require(
+            campaigns[_campaignID].balance + msg.value <= campaigns[_campaignID].cap, 
+            "The value of the donation + the current balance of the fund must be less than the cap to not exceed the cap");
         _;
     }
     
@@ -164,8 +168,11 @@ contract CampaignManager is Ownable, Proxy{
     * @param _value is the amount that the donar wants to reduce their donation by
     */
     modifier campaignWillNotDropBelowGoal(uint _campaignID, uint _value) {
+        // We only need to do this check if the campaign has been funded thus far, with the balance being more than the goal
         if(campaigns[_campaignID].balance>campaigns[_campaignID].goal){
-            require(campaigns[_campaignID].balance-_value > campaigns[_campaignID].goal);
+            require(
+                campaigns[_campaignID].balance-_value > campaigns[_campaignID].goal,
+                "The value of the campaign balance after the reduction will be more than the goal");
         }
         _;
     }
@@ -183,10 +190,12 @@ contract CampaignManager is Ownable, Proxy{
     */
     modifier adequetDonationToReduce(uint _campaignID, uint _value){
         int totalDonation = 0;
-        for (uint i=0; i<campaigns[_campaignID].doners[msg.sender].length;i++){
+        for (uint i = 0; i < campaigns[_campaignID].doners[msg.sender].length; i++){
             totalDonation += campaigns[_campaignID].doners[msg.sender][i];
         }
-        require(totalDonation-int(_value)>=0);
+        require(
+            totalDonation-int(_value) >= 0, 
+            "The sum of all donations for a particular user should be more than 0 to enable any kind of donation reduction");
         _;
     }
     
@@ -196,7 +205,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier onlyManager(uint _campaignID){
-        require(msg.sender == campaigns[_campaignID].manager);
+        require(msg.sender == campaigns[_campaignID].manager,"The caller should be equal to the manager");
         _;
     }
     /**
@@ -206,7 +215,7 @@ contract CampaignManager is Ownable, Proxy{
     * @param _campaignID unique identifer of the campaign
     */
     modifier onlyContributer(uint _campaignID){
-        require(campaigns[_campaignID].doners[msg.sender].length > 0);
+        require(campaigns[_campaignID].doners[msg.sender].length > 0,"The caller should have contributed at least once to the campaign");
         _;
     }
     
@@ -214,7 +223,7 @@ contract CampaignManager is Ownable, Proxy{
     * @dev Prevents the creation of new campaigns
     */
     modifier emergencyStop_Creation(){
-        require(emergencyStop_stopCreation == false);
+        require(emergencyStop_stopCreation == false, "The emergency stop creation is active");
         _;
     }
     
@@ -222,7 +231,7 @@ contract CampaignManager is Ownable, Proxy{
     * @dev Prevents the funding of new campaigns
     */
     modifier emergencyStop_Funding(){
-        require(emergencyStop_stopFunding == false);
+        require(emergencyStop_stopFunding == false, "The emergency stop funding is active");
         _;
     }
     
@@ -380,7 +389,7 @@ contract CampaignManager is Ownable, Proxy{
         // that if they try redraw again the sum total == 0. The require is here
         // to ensure that if the user calls again the function will not preform
         // a transaction of 0 ether and will throw
-        require(totalContributed>0);
+        require(totalContributed > 0, "The total contribution for the user should be positive");
         campaigns[_campaignID].doners[msg.sender].push(-int(totalContributed));
         msg.sender.transfer(totalContributed);
     }

@@ -74,34 +74,12 @@ The workflow and user interaction for Etherstarter is very simple. There are two
 2. The donor can choose to reduce their donation, if they wish, after the donation period. This can *only* be done if the reduction does not result in a successful campaign becoming unsuccessful.
 3. In the event of an unsuccessful campaign, the donor is able to withdraw their funds.
 
-### Design Patterns and Desicions. 
-Key separation of concerns was employed at all levels. This implementation is detailed [here](https://www.google.com)
+# Design Patterns and Desicions. 
+Key separation of concerns was employed at all levels. This implementation is detailed [here](https://github.com/SoIidarity/EthStarter/blob/master/design_pattern_desicions.md)
 
 
-### Security Tools / Common Attacks
-EthStarter has been designed to sufficiently prevent common attack vectors. The simplicity in design means that most normal attack vectors do not apply, such as Race condition, Transaction-Ordering Dependence (TOD) and Front Running. There are, however, three sections of the system design that could result in potential attack vectors. Each of these possible vulnerabilities is discussed as well as how EthStarter mitigates against them.
-
-1. **Timestamp Dependence**
-EthStarter uses the notion of "now" in its design. This can be manipulated by miners but is not a concern for the safety of the system as there are no potential vulnerabilities arising from a ~30 second variance in the start/end time of the campaign.
-2. **Integer Overflow and Underflow**
-The balances of each campaign is stored using a uint. These *could* potentially overflow/underflow. The case of an overflow is imposible as this value corisponds to ether deposited and there is not enough ether in circulation to cause an overflow. Underflows are prevented by sufficient checks within require statements. The correctness of these requires is verified with unit tests.
-3. **Forcibly Sending Ether to a Contract**
-It is conceivable that someone could forcibly send ether the the campaign. This will, however, achieve nothing past the attacker loosing their ether. There is no core logic based on this total value of the contract but rather each campaign has their own independent wallet uint.
-4. **Reentrancy attacks**
-The EthStarter contract is invulnerable to Reentrancy attacks due to correct ordering of operations in withdraw type statements and the use of transfer() to prevent any external code from being executed.
-
-### Smart Contract Testing
-Extensive unit tests have been written for the key logic of the system. Code coverage has also been calculated and the results can be seen below. Both Contracts included in the project yield 100% test coverage.
-
-    |----------------------|----------|----------|----------|----------|----------------|
-    |File                  |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
-    |----------------------|----------|----------|----------|----------|----------------|
-    | contracts/           |      100 |    79.17 |      100 |      100 |                |
-    |  CampaignManager.sol |      100 |    81.82 |      100 |      100 |                |
-    |  Proxy.sol           |      100 |       50 |      100 |      100 |                |
-    |----------------------|----------|----------|----------|----------|----------------|
-    |All files             |      100 |    79.17 |      100 |      100 |                |
-    |----------------------|----------|----------|----------|----------|----------------|
+# Security Tools, Common Attacks, Contract Testing and Coverage
+EthStarter has been designed with a number of security considerations in mind, taking into account the common attack vectors. Additionally, EthStarted has been extensively tested with a number of tools to verify the integrity of the contracts. Unit testing was done on all key operational logic to ensure correct behavior.
 
 
 ### System Limitations

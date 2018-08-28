@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract Proxy is Ownable {
 
@@ -13,14 +13,14 @@ contract Proxy is Ownable {
     }
 
     function upgradeTo(address impl) public onlyOwner {
-        require(_implementation != impl);
+        require(_implementation != impl, "upgrade address should not be the same as the current address");
         _implementation = impl;
         emit Upgraded(impl);
     }
     
-    function () payable public {
+    function () public payable {
         address _impl = implementation();
-        require(_impl != address(0));
+        require(_impl != address(0), "The implementation address should not be the burn address (non-implemented proxy contract)");
         bytes memory data = msg.data;
 
         assembly {
