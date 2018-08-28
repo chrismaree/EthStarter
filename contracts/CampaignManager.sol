@@ -315,7 +315,7 @@ contract CampaignManager is Ownable, Proxy{
         // There is no point in storing a doners address multiple times in the
         //donersAddresses array so only add if you this is your first contribution
         // if(campaigns[_campaignID].doners[msg.sender].length==0){
-            campaigns[_campaignID].donersAddresses.push(msg.sender);         
+        campaigns[_campaignID].donersAddresses.push(msg.sender);         
         // }
         if (campaigns[_campaignID].state != State.Running){
             campaigns[_campaignID].state = State.Running;
